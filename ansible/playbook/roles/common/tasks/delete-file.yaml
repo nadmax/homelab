@@ -1,5 +1,0 @@
-- name: Delete a file
-  ansible.builtin.file:
-    path: "{{ file_path }}"
-    state: absent
-  when: delete_file

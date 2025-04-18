@@ -1,6 +1,0 @@
-- name: Create a file
-  ansible.builtin.file:
-    path: "{{ file_path }}"
-    state: touch
-    mode: '0644'
-  when: create_file

@@ -1,0 +1,13 @@
+- name: Upgrade Packages
+  hosts: workers
+  gather_facts: True
+  become: True
+  vars_files:
+    - ../vault/vault_ssh.yaml
+    - ../vault/vault_become.yaml
+  tasks:
+
+  - name: Upgrade all packages to the latest version
+    dnf:
+      name: "*"
+      state: latest
