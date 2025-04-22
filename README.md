@@ -1,11 +1,9 @@
-# homelab
-## Concept
-The goal is to automate 3 locals VM (called workers).   
+# Homelab
+The goal is to build a Kubernetes local cluster with 3 VMs.  
+I use Terraform to create VMs with [libvirt](https://registry.terraform.io/providers/dmacvicar/libvirt/latest/docs) provider.  
+I use Ansible to automate VMs updates, SSH and Kubernetes setup.  
 
-## Coming soon
-Currently, I only use Ansible to create and delete a file in remote hosts. (more concrete tasks will be defined)  
-I plan to use:  
-- Podman (will try it instead of Docker)
-- Kubernetes (or k3s)  
-- Zabbix  
-- Helm  
+## Unimplemented
+❌ Containers (Docker or Podman)  
+❌ VMs Monitoring (Prometheus/Grafana or Zabbix)  
+❌ Logs monitoring (Depends on VMs monitoring tools)  
