@@ -1,34 +1,31 @@
 #!/bin/sh
 
 if [ "$(id -u)" -ne 0 ]; then
-    echo "This script must be run as root or with sudo privileges."
+    echo "This script must be run with sudo privileges."
     exit 1
 fi
 
-echo_step "Detecting Linux distribution..."
-if [ -f /etc/debian_version ]; then
-    DISTRO="debian"
-    echo "Debian/Ubuntu-based distribution detected."
-elif [ -f /etc/fedora-release ]; then
-    DISTRO="fedora"
-    echo "Fedora distribution detected."
+if grep -qEi "debian|ubuntu" /etc/os-release; then
+    OS="Debian"
+elif grep -qEi "rhel|centos|fedora|rocky|almalinux" /etc/os-release; then
+    OS="RHEL"
 else
-    echo "Unsupported distribution. This script supports Debian/Ubuntu and Fedora only."
+    echo "Unsupported OS detected. Exiting..."
     exit 1
 fi
 
-echo_step "Installing virtualization packages..."
-if [ "$DISTRO" = "debian" ]; then
+echo "Installing virtualization packages..."
+if [ "$OS" = "Debian" ]; then
     apt update
     apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager
     apt install -y virtinst libosinfo-bin
     usermod -aG libvirt $USER || echo "Could not add user to libvirt group. You may need to add your user manually."
-elif [ "$DISTRO" = "fedora" ]; then
+elif [ "$OS" = "RHEL" ]; then
     dnf install -y @virtualization virt-manager libvirt qemu-kvm
     usermod -aG libvirt $USER || echo "Could not add user to libvirt group. You may need to add your user manually."
 fi
 
-echo_step "Starting and enabling libvirt service..."
+echo "Starting and enabling libvirt service..."
 systemctl start libvirtd
 systemctl enable libvirtd
 if systemctl is-active --quiet libvirtd; then
@@ -38,7 +35,7 @@ else
     exit 1
 fi
 
-echo_step "Verifying KVM module..."
+echo "Verifying KVM module..."
 if lsmod | grep -q kvm; then
     echo "KVM module is loaded."
 else
@@ -46,10 +43,10 @@ else
     exit 1
 fi
 
-echo_step "Virtualization setup information:"
+echo "Virtualization setup information:"
 echo "Libvirt status: $(systemctl is-active libvirtd)"
 echo "Libvirt enabled on boot: $(systemctl is-enabled libvirtd)"
-echo_step "Setup completed successfully!"
+echo "Setup completed successfully!"
 echo "You can now run virt-manager with the following command:"
 echo "$ virt-manager"
 echo ""

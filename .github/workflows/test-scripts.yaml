@@ -1,0 +1,51 @@
+name: Scripts
+
+on:
+  pull_request:
+
+jobs:
+  test_debian:
+    name: Test on Debian-based system
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Run ansible.sh
+      run: |
+        chmod +x ./scripts/ansible.sh
+        ./scripts/ansible.sh
+
+    - name: Run libvirt.sh
+      run: |
+        chmod +x ./scripts/libvirt.sh
+        sudo ./scripts/libvirt.sh
+
+    - name: Run opentofu.sh
+      run: |
+        chmod +x ./scripts/opentofu.sh
+        sudo ./scripts/opentofu.sh
+
+  test_fedora:
+    name: Test on Fedora-based system
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+      options: --user=root
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run ansible.sh
+        run: |
+          chmod +x ./scripts/ansible.sh
+          ./scripts/ansible.sh
+
+      - name: Run libvirt.sh
+        run: |
+          chmod +x ./scripts/libvirt.sh
+          ./scripts/libvirt.sh
+
+      - name: Run opentofu.sh
+        run: |
+          chmod +x ./scripts/opentofu.sh
+          ./scripts/opentofu.sh
