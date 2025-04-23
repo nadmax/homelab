@@ -1,5 +1,5 @@
 - name: Harden SSH configuration
-  hosts: hosts
+  hosts: all
   become: true
   vars_files:
   - ../vaults/vault_ssh.yaml

@@ -1,0 +1,168 @@
+- name: Setup Kubernetes
+  hosts: all
+  become: true
+  vars_files:
+    - ../vaults/vault_ssh.yaml
+    - ../vaults/vault_become.yaml
+  tasks:
+    - name: Add Kubernetes yum repository
+      copy:
+        dest: /etc/yum.repos.d/kubernetes.repo
+        content: |
+          [kubernetes]
+          name=Kubernetes
+          baseurl=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/repodata/repomd.xml.key
+          exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
+        mode: '0644'
+
+    - name: Install Kubernetes packages with --disableexcludes
+      yum:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        disable_excludes: kubernetes
+    
+    - name: Install tc (iproute) tool
+      yum:
+        name: iproute-tc
+        state: present
+
+    - name: Enable and start kubelet
+      systemd:
+        name: kubelet
+        state: started
+        enabled: true
+    
+    - name: Run containerd config default command
+      command: containerd config default > /etc/containerd/config.toml
+
+    - name: Ensure SystemdCgroup is set to true
+      lineinfile:
+        path: /etc/containerd/config.toml
+        regexp: '^SystemdCgroup'
+        line: 'SystemdCgroup = true'
+        backup: true
+
+    - name: Disable swap
+      command: swapoff -a
+      become: true
+
+    - name: Mask swap device
+      command: systemctl mask dev-zram0.swap
+
+    - name: Load br_netfilter module
+      modprobe:
+        name: br_netfilter
+        state: present
+
+    - name: Ensure br_netfilter is loaded on boot
+      lineinfile:
+        path: /etc/modules-load.d/kubernetes.conf
+        line: 'br_netfilter'
+        create: true
+
+- name: Open Kubernetes ports on masters
+  hosts: masters
+  become: true
+  vars_files:
+    - ../vaults/vault_ssh.yaml
+    - ../vaults/vault_become.yaml
+  tasks:
+  - name: Open required Kubernetes ports on controlplane
+    firewalld:
+      port: "{{ item }}"
+      permanent: true
+      state: enabled
+    loop:
+      - 6443/tcp
+      - 10250/tcp
+      - 10251/tcp
+      - 10252/tcp
+      - 8472/udp
+    notify: Reload firewalld
+  handlers:
+  - name: Reload firewalld
+    ansible.builtin.service:
+      name: firewalld
+      state: reloaded
+
+- name: Initialize Kubernetes Master Node
+  hosts: masters
+  become: true
+  vars_files:
+    - ../vaults/vault_ssh.yaml
+    - ../vaults/vault_become.yaml
+  tasks:
+    - name: Initialize Kubernetes using kubeadm
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+      register: kubeadm_init_result
+      changed_when: "'initialized' in kubeadm_init_result.stdout"
+
+    - name: Copy kubeconfig to user home
+      shell: |
+        mkdir -p /home/{{ ansible_user }}/.kube
+        cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
+        chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/.kube/config
+      when: kubeadm_init_result.changed
+      become: true
+
+    - name: Install Flannel CNI
+      command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      when: kubeadm_init_result.changed
+      become: false
+
+    - name: Get kubeadm join command
+      command: kubeadm token create --print-join-command
+      register: join_command
+      delegate_to: controlplane
+      run_once: true
+
+    - name: Set kubeadm_join_cmd fact
+      set_fact:
+        kubeadm_join_cmd: "{{ join_command.stdout }}"
+
+
+- name: Open Kubernetes ports on workers
+  hosts: workers
+  become: true
+  vars_files:
+    - ../vaults/vault_ssh.yaml
+    - ../vaults/vault_become.yaml
+  tasks:
+    - name: Open ports using firewalld
+      firewalld:
+        port: "{{ item }}"
+        permanent: true
+        state: enabled
+      loop:
+        - 10250/tcp
+        - 30000-32767/tcp
+        - 8472/udp
+      notify: Reload firewalld
+  handlers:
+    - name: Reload firewalld
+      ansible.builtin.service:
+        name: firewalld
+        state: reloaded
+
+- name: Join Worker Nodes to Cluster
+  hosts: workers
+  become: true
+  vars_files:
+    - ../vaults/vault_ssh.yaml
+    - ../vaults/vault_become.yaml
+  tasks:
+    - name: Reset any existing Kubernetes state
+      shell: |
+        kubeadm reset -f
+        rm -rf /etc/cni/net.d /var/lib/cni /var/lib/kubelet /etc/kubernetes
+        systemctl restart containerd
+        systemctl restart kubelet
+    - name: Join worker node to Kubernetes cluster
+      shell: "{{ hostvars['controlplane'].kubeadm_join_cmd }} --ignore-preflight-errors=all"
+      when: hostvars['controlplane'].kubeadm_join_cmd is defined
