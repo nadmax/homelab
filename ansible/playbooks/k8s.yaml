@@ -11,11 +11,10 @@
         content: |
           [kubernetes]
           name=Kubernetes
-          baseurl=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/
+          baseurl=https://pkgs.k8s.io/core:/stable:/v1.33/rpm/
           enabled=1
           gpgcheck=1
-          gpgkey=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/repodata/repomd.xml.key
-          exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
+          gpgkey=https://pkgs.k8s.io/core:/stable:/v1.33/rpm/repodata/repomd.xml.key
         mode: '0644'
 
     - name: Install Kubernetes packages with --disableexcludes
@@ -25,12 +24,21 @@
           - kubeadm
           - kubectl
         state: present
-        disable_excludes: kubernetes
     
     - name: Install tc (iproute) tool
       yum:
         name: iproute-tc
         state: present
+    
+    - name: Ensure IP forwarding is enabled in /etc/sysctl.conf
+      lineinfile:
+        path: /etc/sysctl.conf
+        line: 'net.ipv4.ip_forward = 1'
+        state: present
+        regexp: '^net\.ipv4\.ip_forward'
+
+    - name: Apply sysctl settings
+      command: sysctl -p
 
     - name: Enable and start kubelet
       systemd:
@@ -44,8 +52,10 @@
     - name: Ensure SystemdCgroup is set to true
       lineinfile:
         path: /etc/containerd/config.toml
-        regexp: '^SystemdCgroup'
         line: 'SystemdCgroup = true'
+        insertafter: '[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]'
+        regexp: '^SystemdCgroup'
+        state: present
         backup: true
 
     - name: Disable swap
@@ -112,12 +122,18 @@
       become: true
 
     - name: Install Flannel CNI
-      command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      command: kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
       when: kubeadm_init_result.changed
+      become: false
+    
+    - name: Interact with Cluster
+      command: kubectl taint node controlplane node-role.kubernetes.io/control-plane:NoSchedule-
       become: false
 
     - name: Get kubeadm join command
       command: kubeadm token create --print-join-command
+      environment:
+        KUBECONFIG: ~/.kube/config
       register: join_command
       delegate_to: controlplane
       run_once: true
