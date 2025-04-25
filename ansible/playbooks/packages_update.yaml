@@ -3,7 +3,6 @@
   gather_facts: true
   become: true
   vars_files:
-    - ../vaults/vault_ssh.yaml
     - ../vaults/vault_become.yaml
   tasks:
 

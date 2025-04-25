@@ -1,3 +1,4 @@
 *.lock*
 *.terraform
 *.tfstate*
+.vault_pass
