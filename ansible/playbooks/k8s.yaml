@@ -120,8 +120,8 @@
       when: kubeadm_init_result.changed
       become: true
 
-    - name: Install Flannel CNI
-      command: kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+    - name: Install Calico CNI
+      command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
       when: kubeadm_init_result.changed
       become: false
     
