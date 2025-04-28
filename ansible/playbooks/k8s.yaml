@@ -16,7 +16,7 @@
           gpgkey=https://pkgs.k8s.io/core:/stable:/v1.33/rpm/repodata/repomd.xml.key
         mode: '0644'
 
-    - name: Install Kubernetes packages with --disableexcludes
+    - name: Install Kubernetes packages
       yum:
         name:
           - kubelet
@@ -42,6 +42,17 @@
     - name: Enable and start kubelet
       systemd:
         name: kubelet
+        state: started
+        enabled: true
+    
+    - name: Install containerd
+      yum:
+        name: containerd
+        state: present
+    
+    - name: Enable and start containerd
+      systemd:
+        name: containerd
         state: started
         enabled: true
     
@@ -79,7 +90,6 @@
   hosts: masters
   become: true
   vars_files:
-    - ../vaults/vault_ssh.yaml
     - ../vaults/vault_become.yaml
   tasks:
   - name: Open required Kubernetes ports on controlplane
@@ -93,6 +103,7 @@
       - 10251/tcp
       - 10252/tcp
       - 8472/udp
+      - 179/tcp
     notify: Reload firewalld
   handlers:
   - name: Reload firewalld
@@ -104,11 +115,10 @@
   hosts: masters
   become: true
   vars_files:
-    - ../vaults/vault_ssh.yaml
     - ../vaults/vault_become.yaml
   tasks:
     - name: Initialize Kubernetes using kubeadm
-      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+      command: kubeadm init --pod-network-cidr=192.168.0.0/16
       register: kubeadm_init_result
       changed_when: "'initialized' in kubeadm_init_result.stdout"
 
@@ -119,11 +129,6 @@
         chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/.kube/config
       when: kubeadm_init_result.changed
       become: true
-
-    - name: Install Calico CNI
-      command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
-      when: kubeadm_init_result.changed
-      become: false
     
     - name: Interact with Cluster
       command: kubectl taint node controlplane node-role.kubernetes.io/control-plane:NoSchedule-
@@ -158,6 +163,7 @@
         - 10250/tcp
         - 30000-32767/tcp
         - 8472/udp
+        - 179/tcp
       notify: Reload firewalld
   handlers:
     - name: Reload firewalld
@@ -169,7 +175,6 @@
   hosts: workers
   become: true
   vars_files:
-    - ../vaults/vault_ssh.yaml
     - ../vaults/vault_become.yaml
   tasks:
     - name: Reset any existing Kubernetes state

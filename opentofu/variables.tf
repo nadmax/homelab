@@ -1,7 +1,7 @@
 variable "iso_path" {
     description = "Path to Fedora Server ISO"
     type        = string
-    default     = "/var/lib/libvirt/images/Fedora-Server-dvd-x86_64-41-1.4.iso"
+    default     = "/var/lib/libvirt/images/Fedora-Server-dvd-x86_64-42-1.1.iso"
 }
 
 variable "disk_size_gb" {
