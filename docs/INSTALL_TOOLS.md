@@ -1,4 +1,4 @@
-# 🗒️ Install dependencies
+# 🗒️ Installing tools
 
 You need virtualization packages, Ansible and OpenTofu on your host machine to install my homelab.  
 To do so, run the following commands:

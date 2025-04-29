@@ -27,5 +27,5 @@ Each VM is provisioned, configured, and container-ready with Docker and Kubernet
 - 🔴 **Centralized Logging** — Will depend on the selected monitoring stack  
 
 ## 🗒️ Docs
-Please refer first to the [installation dependencies guide](https://github.com/nadmax/homelab/blob/master/docs/INSTALL.md) to install required tools.  
-Then, refer to the [Homelab Setup guide](https://github.com/nadmax/homelab/blob/master/docs/SETUP.md).
+Docs are available [here](https://github.com/nadmax/homelab/blob/master/docs).  
+Please read them carefully!
