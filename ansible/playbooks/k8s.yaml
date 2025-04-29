@@ -2,8 +2,12 @@
   hosts: all
   become: true
   vars_files:
-    - ../vaults/vault_become.yaml
+    - vaults/vault
   tasks:
+    - name: Disable SELinux
+      ansible.posix.selinux:
+        state: disabled
+
     - name: Add Kubernetes yum repository
       copy:
         dest: /etc/yum.repos.d/kubernetes.repo
@@ -90,7 +94,7 @@
   hosts: masters
   become: true
   vars_files:
-    - ../vaults/vault_become.yaml
+    - vaults/vault
   tasks:
   - name: Open required Kubernetes ports on controlplane
     firewalld:
@@ -115,7 +119,7 @@
   hosts: masters
   become: true
   vars_files:
-    - ../vaults/vault_become.yaml
+    - vaults/vault
   tasks:
     - name: Initialize Kubernetes using kubeadm
       command: kubeadm init --pod-network-cidr=192.168.0.0/16
@@ -151,8 +155,7 @@
   hosts: workers
   become: true
   vars_files:
-    - ../vaults/vault_ssh.yaml
-    - ../vaults/vault_become.yaml
+    - vaults/vault
   tasks:
     - name: Open ports using firewalld
       firewalld:
@@ -175,7 +178,7 @@
   hosts: workers
   become: true
   vars_files:
-    - ../vaults/vault_become.yaml
+    - vaults/vault
   tasks:
     - name: Reset any existing Kubernetes state
       shell: |

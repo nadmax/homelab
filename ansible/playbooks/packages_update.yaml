@@ -3,7 +3,7 @@
   gather_facts: true
   become: true
   vars_files:
-    - ../vaults/vault_become.yaml
+    - vaults/vault
   tasks:
 
   - name: Upgrade all packages to the latest version

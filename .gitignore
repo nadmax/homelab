@@ -1,5 +1,5 @@
 *.lock*
 *.terraform
 *.tfstate*
-.vault_pass
+*vault*
 *secrets
