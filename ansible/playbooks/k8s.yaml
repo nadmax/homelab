@@ -4,12 +4,8 @@
   vars_files:
     - vaults/vault
   tasks:
-    - name: Disable SELinux
-      ansible.posix.selinux:
-        state: disabled
-
     - name: Add Kubernetes yum repository
-      copy:
+      ansible.builtin.copy:
         dest: /etc/yum.repos.d/kubernetes.repo
         content: |
           [kubernetes]
@@ -21,50 +17,49 @@
         mode: '0644'
 
     - name: Install Kubernetes packages
-      yum:
+      ansible.builtin.dnf:
         name:
           - kubelet
           - kubeadm
           - kubectl
         state: present
-    
+
     - name: Install tc (iproute) tool
-      yum:
+      ansible.builtin.dnf:
         name: iproute-tc
         state: present
-    
-    - name: Ensure IP forwarding is enabled in /etc/sysctl.conf
-      lineinfile:
-        path: /etc/sysctl.conf
-        line: 'net.ipv4.ip_forward = 1'
-        state: present
-        regexp: '^net\.ipv4\.ip_forward'
 
-    - name: Apply sysctl settings
-      command: sysctl -p
+    - name: Ensure IP forwarding is enabled in /etc/sysctl.conf
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: true
+        state: present
+        reload: true
 
     - name: Enable and start kubelet
-      systemd:
+      ansible.builtin.systemd:
         name: kubelet
         state: started
         enabled: true
-    
+
     - name: Install containerd
-      yum:
+      ansible.builtin.dnf:
         name: containerd
         state: present
-    
+
     - name: Enable and start containerd
-      systemd:
+      ansible.builtin.systemd:
         name: containerd
         state: started
         enabled: true
-    
+
     - name: Run containerd config default command
-      command: containerd config default > /etc/containerd/config.toml
+      ansible.builtin.command: containerd config default > /etc/containerd/config.toml
+      changed_when: false
 
     - name: Ensure SystemdCgroup is set to true
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/containerd/config.toml
         line: 'SystemdCgroup = true'
         insertafter: '[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]'
@@ -73,22 +68,24 @@
         backup: true
 
     - name: Disable swap
-      command: swapoff -a
-      become: true
+      ansible.builtin.command: swapoff -a
+      changed_when: false
 
     - name: Mask swap device
-      command: systemctl mask dev-zram0.swap
+      ansible.builtin.systemd:
+        name: dev-zram0.swap
+        masked: true
 
     - name: Load br_netfilter module
-      modprobe:
+      community.general.modprobe:
         name: br_netfilter
         state: present
 
     - name: Ensure br_netfilter is loaded on boot
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/modules-load.d/kubernetes.conf
         line: 'br_netfilter'
-        create: true
+        create: false
 
 - name: Open Kubernetes ports on masters
   hosts: masters
@@ -96,24 +93,24 @@
   vars_files:
     - vaults/vault
   tasks:
-  - name: Open required Kubernetes ports on controlplane
-    firewalld:
-      port: "{{ item }}"
-      permanent: true
-      state: enabled
-    loop:
-      - 6443/tcp
-      - 10250/tcp
-      - 10251/tcp
-      - 10252/tcp
-      - 8472/udp
-      - 179/tcp
-    notify: Reload firewalld
+    - name: Open required Kubernetes ports on controlplane
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        permanent: true
+        state: enabled
+      loop:
+        - 6443/tcp
+        - 10250/tcp
+        - 10251/tcp
+        - 10252/tcp
+        - 8472/udp
+        - 179/tcp
+      notify: Reload firewalld
   handlers:
-  - name: Reload firewalld
-    ansible.builtin.service:
-      name: firewalld
-      state: reloaded
+    - name: Reload firewalld
+      ansible.builtin.service:
+        name: firewalld
+        state: reloaded
 
 - name: Initialize Kubernetes Master Node
   hosts: masters
@@ -122,32 +119,32 @@
     - vaults/vault
   tasks:
     - name: Initialize Kubernetes using kubeadm
-      command: kubeadm init --pod-network-cidr=192.168.0.0/16
+      ansible.builtin.command: kubeadm init --pod-network-cidr=192.168.0.0/16
       register: kubeadm_init_result
       changed_when: "'initialized' in kubeadm_init_result.stdout"
 
     - name: Copy kubeconfig to user home
-      shell: |
+      ansible.builtin.shell: |
         mkdir -p /home/{{ ansible_user }}/.kube
         cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
         chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/.kube/config
-      when: kubeadm_init_result.changed
       become: true
-    
+      changed_when: false
+
     - name: Interact with Cluster
-      command: kubectl taint node controlplane node-role.kubernetes.io/control-plane:NoSchedule-
-      become: false
+      ansible.builtin.command: kubectl taint node controlplane node-role.kubernetes.io/control-plane:NoSchedule-
+      changed_when: false
 
     - name: Get kubeadm join command
-      command: kubeadm token create --print-join-command
+      ansible.builtin.command: kubeadm token create --print-join-command
       environment:
         KUBECONFIG: ~/.kube/config
       register: join_command
       delegate_to: controlplane
-      run_once: true
+      changed_when: false
 
     - name: Set kubeadm_join_cmd fact
-      set_fact:
+      ansible.builtin.set_fact:
         kubeadm_join_cmd: "{{ join_command.stdout }}"
 
 
@@ -158,7 +155,7 @@
     - vaults/vault
   tasks:
     - name: Open ports using firewalld
-      firewalld:
+      ansible.posix.firewalld:
         port: "{{ item }}"
         permanent: true
         state: enabled
@@ -181,11 +178,15 @@
     - vaults/vault
   tasks:
     - name: Reset any existing Kubernetes state
-      shell: |
+      ansible.builtin.shell: |
         kubeadm reset -f
         rm -rf /etc/cni/net.d /var/lib/cni /var/lib/kubelet /etc/kubernetes
         systemctl restart containerd
         systemctl restart kubelet
+      changed_when: false
+
     - name: Join worker node to Kubernetes cluster
-      shell: "{{ hostvars['controlplane'].kubeadm_join_cmd }} --ignore-preflight-errors=all"
+      ansible.builtin.shell: |
+        "{{ hostvars['controlplane'].kubeadm_join_cmd }} --ignore-preflight-errors=all"
       when: hostvars['controlplane'].kubeadm_join_cmd is defined
+      changed_when: false
