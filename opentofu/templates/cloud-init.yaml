@@ -1,20 +1,16 @@
 hostname: ${hostname}
-ssh_pwauth: False
+ssh_pwauth: false
 
 users:
   - default
   - name: user01
     primary_group: user01
-    groups: sudo
+    gecos: user01
+    groups: wheel
     shell: /bin/bash
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
-    lock_passwd: false
+    passwd: ${user_passwd}
     ssh_authorized_keys:
-        - ${file("~/.ssh/id_rsa.pub")}
-
-write_files:
-  - path: /etc/motd
-    content: |
-      Welcome to your $(hostname) VM!
+      - ${ssh_public_key}
 
 final_message: "Cloud-init has finished running."

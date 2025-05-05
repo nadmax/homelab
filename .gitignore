@@ -3,3 +3,4 @@
 *.tfstate*
 *vault*
 *secrets
+*.passwd

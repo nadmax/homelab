@@ -1,13 +1,13 @@
 variable "iso_path" {
-  description = "Path to Fedora Server ISO"
+  description = "Link to Fedora Server ISO"
   type        = string
-  default     = "/var/lib/libvirt/images/Fedora-Server-dvd-x86_64-42-1.1.iso"
+  default     = "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Server/x86_64/iso/Fedora-Server-dvd-x86_64-42-1.1.iso"
 }
 
-variable "disk_size_gb" {
+variable "disk_size" {
   description = "Size of each VM disk in GiB"
   type        = number
-  default     = 100
+  default     = 100 * 1024 * 1024 * 1024
 }
 
 variable "vm_definitions" {
@@ -36,4 +36,10 @@ variable "network_name" {
   description = "Libvirt network name"
   type        = string
   default     = "default"
+}
+
+variable "ssh_public_key" {
+  description = "Path to the SSH public key"
+  type        = string
+  default     = "~/.ssh/id_rsa.pub"
 }
