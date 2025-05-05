@@ -1,11 +1,11 @@
 data "template_file" "user_data" {
   for_each = local.vms
-  template = file("${path.module}/templates/cloud-init.yaml")
+  template = file("${path.module}/cloud-init.yaml")
 
   vars = {
     hostname       = each.key
     ssh_public_key = file(var.ssh_public_key)
-    user_passwd    = file("${path.module}/.passwd")
+    hashed_passwd  = file("${path.module}/.passwd")
   }
 }
 

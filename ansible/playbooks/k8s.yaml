@@ -4,18 +4,6 @@
   vars_files:
     - vaults/vault
   tasks:
-    - name: Add Kubernetes yum repository
-      ansible.builtin.copy:
-        dest: /etc/yum.repos.d/kubernetes.repo
-        content: |
-          [kubernetes]
-          name=Kubernetes
-          baseurl=https://pkgs.k8s.io/core:/stable:/v1.33/rpm/
-          enabled=1
-          gpgcheck=1
-          gpgkey=https://pkgs.k8s.io/core:/stable:/v1.33/rpm/repodata/repomd.xml.key
-        mode: '0644'
-
     - name: Install Kubernetes packages
       ansible.builtin.dnf:
         name:

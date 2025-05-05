@@ -6,11 +6,7 @@ resource "libvirt_domain" "vms" {
   cloudinit = libvirt_cloudinit_disk.cloudinit[each.key].id
 
   disk {
-    volume_id = libvirt_volume.vm_disks[each.key].id
-  }
-
-  disk {
-    file = libvirt_volume.fedora_iso.id
+    volume_id = libvirt_volume.rootfs[each.key].id
   }
 
   network_interface {
@@ -22,10 +18,6 @@ resource "libvirt_domain" "vms" {
     type        = "vnc"
     listen_type = "address"
     autoport    = true
-  }
-
-  boot_device {
-    dev = ["cdrom", "hd"]
   }
 
   console {

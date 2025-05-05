@@ -1,14 +1,15 @@
-resource "libvirt_volume" "fedora_iso" {
-  name   = "fedora-server.iso"
-  pool   = "default"
-  source = var.iso_path
-  format = "raw"
-}
-
-resource "libvirt_volume" "vm_disks" {
+resource "libvirt_volume" "rootfs_base" {
   for_each = local.vms
   name     = "${each.key}.qcow2"
   pool     = "default"
+  source   = var.qcow2_path
   format   = "qcow2"
-  size     = var.disk_size
+}
+
+resource "libvirt_volume" "rootfs" {
+  for_each       = local.vms
+  name           = "${each.key}-resized.qcow2"
+  pool           = "default"
+  base_volume_id = libvirt_volume.rootfs_base[each.key].id
+  size           = var.disk_size
 }

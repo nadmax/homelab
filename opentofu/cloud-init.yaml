@@ -1,0 +1,36 @@
+#cloud-config
+hostname: ${hostname}
+fdqn: ${hostname}.localdomain
+prefer_fqdn_over_hostname: false
+create_hostname_file: true
+
+ssh_pwauth: false
+disable_root: true
+allow_public_ssh_keys: true
+
+users:
+  - name: user01
+    shell: /bin/bash
+    sudo: ALL=(ALL) :ALL
+    groups: wheel
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+
+packages:
+- python3-libdnf5
+- vim
+
+yum_repos:
+  kubernetes:
+    name: Kubernetes
+    baseurl: https://pkgs.k8s.io/core:/stable:/v1.33/rpm/
+    gpgcheck: true
+    gpgkey: https://pkgs.k8s.io/core:/stable:/v1.33/rpm/repodata/repomd.xml.key
+    enabled: true
+yum_repo_dir: /etc/yum.repos.d/
+
+chpasswd:
+  expire: false
+  users:
+  - {name: user01, password: ${hashed_passwd}}

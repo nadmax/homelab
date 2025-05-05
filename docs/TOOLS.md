@@ -8,4 +8,4 @@ sudo ./install_complete.sh
 ```
 
 You need sudo privileges to run the install script as it uses your package manager.  
-Currently works on Debian and RHEL based distributions.
+⚠️ Currently works on Debian and RHEL based distributions.

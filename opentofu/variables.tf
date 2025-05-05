@@ -1,7 +1,7 @@
-variable "iso_path" {
-  description = "Link to Fedora Server ISO"
+variable "qcow2_path" {
+  description = "Link to Fedora Cloud image"
   type        = string
-  default     = "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Server/x86_64/iso/Fedora-Server-dvd-x86_64-42-1.1.iso"
+  default     = "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Cloud/x86_64/images/Fedora-Cloud-Base-Generic-42-1.1.x86_64.qcow2"
 }
 
 variable "disk_size" {
