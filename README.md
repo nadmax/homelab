@@ -15,16 +15,10 @@ Each VM is provisioned, configured, and container-ready with Docker and Kubernet
 - [Docker](https://www.docker.com/): Container runtime for workloads  
 - [Kubernetes](https://kubernetes.io/): Container orchestration for deploying and managing applications  
 
-## Features
-- Automated VM provisioning and container runtime setup  
-- Local Kubernetes cluster bootstrapped and ready for deployments  
-- Modular infrastructure code and playbooks for easy maintenance  
-
 ## Documentation
 The documentation is divided into 2 parts.  
 It is available [here](https://github.com/nadmax/homelab/blob/master/docs).  
 **Please read it carefully!**
 
 ## Planned Improvements
-
-- 🔴 **Centralized Logging**: It will depend on the selected monitoring stack  
+- 🔴 **Centralized Logging**: Loki?
