@@ -1,51 +1,14 @@
-name: Scripts
+name: Tools
 
 on:
-  workflow_dispatch:
+  pull_request:
 
 jobs:
-  test_debian:
-    name: Test on Debian-based system
-    runs-on: ubuntu-latest
+  install: 
+    runs-on: ubuntu-24.04
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Run ansible.sh
-      run: |
-        chmod +x ./scripts/ansible.sh
-        ./scripts/ansible.sh
-
-    - name: Run libvirt.sh
-      run: |
-        chmod +x ./scripts/libvirt.sh
-        sudo ./scripts/libvirt.sh
-
-    - name: Run opentofu.sh
-      run: |
-        chmod +x ./scripts/opentofu.sh
-        sudo ./scripts/opentofu.sh
-
-  test_fedora:
-    name: Test on Fedora-based system
-    runs-on: ubuntu-latest
-    container:
-      image: fedora:latest
-      options: --user=root
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run ansible.sh
+      - uses: actions/checkout@v4
+      - name: Install required tools
         run: |
-          chmod +x ./scripts/ansible.sh
-          ./scripts/ansible.sh
-
-      - name: Run libvirt.sh
-        run: |
-          chmod +x ./scripts/libvirt.sh
-          ./scripts/libvirt.sh
-
-      - name: Run opentofu.sh
-        run: |
-          chmod +x ./scripts/opentofu.sh
-          ./scripts/opentofu.sh
+          chmod +x ./scripts/install_tools.sh
+          sudo ./scripts/install_tools.sh

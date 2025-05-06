@@ -73,7 +73,7 @@ install_virt_packages() {
         apt install -y virtinst libosinfo-bin
         usermod -aG libvirt $USER || echo "Could not add user to libvirt group. You may need to add your user manually."
     elif [ "$OS" = "RHEL" ]; then
-        dnf install -y @virtualization virt-manager libvirt qemu-kvm
+        dnf install -y @virtualization
         usermod -aG libvirt $USER || echo "Could not add user to libvirt group. You may need to add your user manually."
     fi
 
@@ -126,6 +126,7 @@ main() {
         install_opentofu_for_debian
     elif [ "$OS" = "RHEL" ]; then
         install_opentofu_for_rhel
+    fi
 }
 
 main
