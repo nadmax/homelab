@@ -11,7 +11,7 @@ allow_public_ssh_keys: true
 users:
   - name: user01
     shell: /bin/bash
-    sudo: ALL=(ALL) :ALL
+    sudo: ALL=(ALL) ALL
     groups: wheel
     lock_passwd: true
     ssh_authorized_keys:
