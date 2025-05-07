@@ -73,7 +73,13 @@
       ansible.builtin.lineinfile:
         path: /etc/modules-load.d/kubernetes.conf
         line: 'br_netfilter'
-        create: false
+        create: true
+        mode: "0600"
+
+    - name: Make sure firewalld is running
+      ansible.builtin.systemd:
+        state: started
+        name: firewalld
 
 - name: Open Kubernetes ports on masters
   hosts: masters
@@ -119,10 +125,6 @@
       become: true
       changed_when: false
 
-    - name: Interact with Cluster
-      ansible.builtin.command: kubectl taint node controlplane node-role.kubernetes.io/control-plane:NoSchedule-
-      changed_when: false
-
     - name: Get kubeadm join command
       ansible.builtin.command: kubeadm token create --print-join-command
       environment:
@@ -134,7 +136,6 @@
     - name: Set kubeadm_join_cmd fact
       ansible.builtin.set_fact:
         kubeadm_join_cmd: "{{ join_command.stdout }}"
-
 
 - name: Open Kubernetes ports on workers
   hosts: workers
@@ -175,6 +176,6 @@
 
     - name: Join worker node to Kubernetes cluster
       ansible.builtin.shell: |
-        "{{ hostvars['controlplane'].kubeadm_join_cmd }} --ignore-preflight-errors=all"
+        {{ hostvars['controlplane'].kubeadm_join_cmd }}
       when: hostvars['controlplane'].kubeadm_join_cmd is defined
       changed_when: false
