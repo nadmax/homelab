@@ -1,3 +1,5 @@
+![Ansible](https://github.com/nadmax/website/actions/workflows/ansible.yaml/badge.svg) ![OpenTofu](https://github.com/nadmax/website/actions/workflows/opentofu.yaml/badge.svg)
+
 # Homelab
 The aim of this project is to create a local Kubernetes cluster that can be replicated on your premises.  
 It is built with automation and scalability in mind.  
