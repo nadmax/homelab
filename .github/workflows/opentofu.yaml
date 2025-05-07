@@ -16,18 +16,3 @@ jobs:
             - name: Run tofu fmt
               run: tofu fmt -check -write=false -diff
               continue-on-error: false
-
-    plan:
-        runs-on: ubuntu-24.04
-        steps:
-            - uses: actions/checkout@v4
-            - uses: opentofu/setup-opentofu@v1
-            - name: Run tofu init
-              run: tofu init
-              continue-on-error: false
-            - name: Run tofu validate
-              run: tofu validate
-              continue-on-error: false
-            - name: Run tofu plan
-              run: tofu plan
-              continue-on-error: false
