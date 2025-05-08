@@ -1,4 +1,4 @@
-# 💡 Read this before starting
+# Read this before starting
 
 **Welcome to my homelab setup guide !**  
 In order to start the setup, you must first read the [tools installation guide](https://github.com/nadmax/homelab/blob/master/docs/TOOLS.md).  

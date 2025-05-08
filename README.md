@@ -18,8 +18,7 @@ Each VM is provisioned, configured, and container-ready with Docker and Kubernet
 - [Kubernetes](https://kubernetes.io/): Container orchestration for deploying and managing applications  
 
 ## Documentation
-The documentation is divided into 2 parts.  
-It is available [here](https://github.com/nadmax/homelab/blob/master/docs).  
+The documentation is available [here](https://github.com/nadmax/homelab/blob/master/docs).  
 **Please read it carefully!**
 
 ## Planned Improvements
