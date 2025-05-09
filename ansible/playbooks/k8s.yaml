@@ -43,7 +43,12 @@
         enabled: true
 
     - name: Run containerd config default command
-      ansible.builtin.command: containerd config default > /etc/containerd/config.toml
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          rm /etc/containerd/config.toml
+          containerd config default | tee /etc/containerd/config.toml
+        executable: /bin/bash
       changed_when: false
 
     - name: Ensure SystemdCgroup is set to true
