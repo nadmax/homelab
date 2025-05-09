@@ -35,15 +35,15 @@ start_vms() {
 help() {
     echo -e "Usage: $0 [COMMAND]"
     echo "Commands:"
-    echo "  start          Start the virtual machines: controlplane, node01, node02"
-    echo "  stop           Shutdown the virtual machines: controlplane, node01, node02"
-    echo "  delete         Delete the virtual machines: controlplane, node01, node02"
+    echo "  start          Start the virtual machines"
+    echo "  stop           Shutdown the virtual machines"
+    echo "  delete         Delete the virtual machines with their associated volumes"
     echo -e "  help           Show this help message\n"
     echo "Options:"
     echo -e "  -h, --help   Show this help message\n"
     echo "Examples:"
-    echo "  $0 start      (Start all VMs)"
-    echo "  $0 help       (Display help)"
+    echo "  $0 start"
+    echo "  $0 help"
 }
 
 if [ "$#" -eq 0 ]; then
