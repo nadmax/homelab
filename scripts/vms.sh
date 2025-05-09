@@ -1,5 +1,11 @@
 #!/bin/sh
 
+delete_vms() {
+    virsh undefine controlplane
+    virsh undefine node01
+    virsh undefine node02
+}
+
 stop_vms() {
     virsh shutdown controlplane
     virsh shutdown node01
@@ -15,14 +21,14 @@ start_vms() {
 help() {
     echo -e "Usage: $0 [COMMAND]"
     echo "Commands:"
-    echo "  start        Start the virtual machines: controlplane, node01, node02"
-    echo "  stop         Shutdown the virtual machines: controlplane, node01, node02"
-    echo -e "  help         Show this help message\n"
+    echo "  start          Start the virtual machines: controlplane, node01, node02"
+    echo "  stop           Shutdown the virtual machines: controlplane, node01, node02"
+    echo "  delete         Delete the virtual machines: controlplane, node01, node02"
+    echo -e "  help           Show this help message\n"
     echo "Options:"
     echo -e "  -h, --help   Show this help message\n"
     echo "Examples:"
     echo "  $0 start      (Start all VMs)"
-    echo "  $0 stop       (Stop all VMs)"
     echo "  $0 help       (Display help)"
 }
 
@@ -34,6 +40,7 @@ fi
 case "$1" in
     start) start_vms;;
     stop) stop_vms;;
+    delete) delete_vms;;
     -h|--help|help) help;;
     *)
         echo -e "Invalid argument: $1\n"

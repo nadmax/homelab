@@ -1,7 +1,7 @@
 #!/bin/sh
 
 install_opentofu_for_rhel() {
-        cat >/etc/yum.repos.d/opentofu.repo << EOF
+    cat >/etc/yum.repos.d/opentofu.repo << EOF
 [opentofu]
 name=opentofu
 baseurl=https://packages.opentofu.org/opentofu/tofu/rpm_any/rpm_any/\$basearch
@@ -26,21 +26,21 @@ sslverify=1
 sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 metadata_expire=300
 EOF
-    sudo yum install -y tofu
+    dnf install -y tofu
 }
 
 install_opentofu_for_debian() {    
-    sudo install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://get.opentofu.org/opentofu.gpg | sudo tee /etc/apt/keyrings/opentofu.gpg >/dev/null
-    curl -fsSL https://packages.opentofu.org/opentofu/tofu/gpgkey | sudo gpg --no-tty --batch --dearmor -o /etc/apt/keyrings/opentofu-repo.gpg >/dev/null
-    sudo chmod a+r /etc/apt/keyrings/opentofu.gpg /etc/apt/keyrings/opentofu-repo.gpg
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://get.opentofu.org/opentofu.gpg | tee /etc/apt/keyrings/opentofu.gpg >/dev/null
+    curl -fsSL https://packages.opentofu.org/opentofu/tofu/gpgkey | gpg --no-tty --batch --dearmor -o /etc/apt/keyrings/opentofu-repo.gpg >/dev/null
+    chmod a+r /etc/apt/keyrings/opentofu.gpg /etc/apt/keyrings/opentofu-repo.gpg
     echo \
     "deb [signed-by=/etc/apt/keyrings/opentofu.gpg,/etc/apt/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main
     deb-src [signed-by=/etc/apt/keyrings/opentofu.gpg,/etc/apt/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main" | \
-    sudo tee /etc/apt/sources.list.d/opentofu.list > /dev/null
-    sudo chmod a+r /etc/apt/sources.list.d/opentofu.list
-    sudo apt-get update
-    sudo apt-get install -y tofu
+    tee /etc/apt/sources.list.d/opentofu.list > /dev/null
+    chmod a+r /etc/apt/sources.list.d/opentofu.list
+    apt update
+    apt install -y tofu
 }
 
 install_ansible() {
@@ -50,10 +50,10 @@ install_ansible() {
         echo "pip3 not found, installing pip..."
 
         if [ "$OS" = "Debian" ]; then
-            sudo apt update
-            sudo apt install -y python3-pip
+             apt update
+             apt install -y python3-pip
         elif [ "$OS" = "RHEL" ]; then
-            sudo dnf install -y python3-pip
+             dnf install -y python3-pip
         else
             echo "Unsupported OS detected. Exiting..."
             exit 1
@@ -71,12 +71,11 @@ install_virt_packages() {
         apt update
         apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager
         apt install -y virtinst libosinfo-bin
-        usermod -aG libvirt $USER || echo "Could not add user to libvirt group. You may need to add your user manually."
     elif [ "$OS" = "RHEL" ]; then
         dnf install -y @virtualization
-        usermod -aG libvirt $USER || echo "Could not add user to libvirt group. You may need to add your user manually."
     fi
 
+    usermod -aG libvirt $USER || echo "Could not add user to libvirt group. You may need to add your user manually."
     echo "Starting and enabling libvirt service..."
     systemctl start libvirtd
     systemctl enable libvirtd
@@ -100,8 +99,7 @@ install_virt_packages() {
     echo "Libvirt enabled on boot: $(systemctl is-enabled libvirtd)"
     echo "Setup completed successfully!"
     echo "You can now run virt-manager with the following command:"
-    echo "$ virt-manager"
-    echo ""
+    echo -e "$ virt-manager\n"
     echo "NOTE: You may need to log out and log back in for group changes to take effect."
 }
 
