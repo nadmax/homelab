@@ -1,9 +1,23 @@
 #!/bin/sh
 
+delete_volumes() {
+    volumes=$(virsh vol-list default | awk 'NR > 2 {print $1}')
+    if [ -z "$volumes" ]; then
+        echo "No volumes found in pool default."
+        exit 0
+    fi
+
+    for vol in $volumes; do
+        echo "Deleting volume: $vol"
+        virsh vol-delete "$vol" --pool default
+    done
+}
+
 delete_vms() {
     virsh undefine controlplane
     virsh undefine node01
     virsh undefine node02
+    delete_volumes
 }
 
 stop_vms() {
