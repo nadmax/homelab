@@ -1,3 +1,5 @@
+#!/bin/sh
+
 NAMESPACE=monitoring
 TMPDIR=$(mktemp -d)
 LATEST=$(curl -s https://api.github.com/repos/prometheus-operator/prometheus-operator/releases/latest | jq -cr .tag_name)
