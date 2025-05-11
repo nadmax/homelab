@@ -1,0 +1,24 @@
+- name: Initialize Kubernetes using kubeadm
+  ansible.builtin.command: kubeadm init --pod-network-cidr=192.168.0.0/16
+  register: kubeadm_init_result
+  changed_when: "'initialized' in kubeadm_init_result.stdout"
+
+- name: Copy kubeconfig to user home
+  ansible.builtin.shell: |
+    mkdir -p /home/{{ ansible_user }}/.kube
+    cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
+    chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/.kube/config
+  become: true
+  changed_when: false
+
+- name: Get kubeadm join command
+  ansible.builtin.command: kubeadm token create --print-join-command
+  environment:
+    KUBECONFIG: ~/.kube/config
+  register: join_command
+  delegate_to: controlplane
+  changed_when: false
+
+- name: Set kubeadm_join_cmd fact
+  ansible.builtin.set_fact:
+    kubeadm_join_cmd: "{{ join_command.stdout }}"

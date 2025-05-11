@@ -1,0 +1,54 @@
+- name: Ensure IP forwarding is enabled in /etc/sysctl.conf
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable swap
+  ansible.builtin.command: swapoff -a
+  changed_when: false
+
+- name: Mask swap device
+  ansible.builtin.systemd:
+    name: dev-zram0.swap
+    masked: true
+
+- name: Make sure firewalld is running
+  ansible.builtin.systemd:
+    state: started
+    name: firewalld
+
+- name: Enable and start kubelet
+  ansible.builtin.systemd:
+    name: kubelet
+    state: started
+    enabled: true
+
+- name: Enable and start containerd
+  ansible.builtin.systemd:
+    name: containerd
+    state: started
+    enabled: true
+
+- name: Load br_netfilter module
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Ensure br_netfilter is loaded on boot
+  ansible.builtin.lineinfile:
+    path: /etc/modules-load.d/kubernetes.conf
+    line: 'br_netfilter'
+    create: true
+    mode: "0600"
+
+- name: Run containerd config default command
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      rm /etc/containerd/config.toml
+      containerd config default | tee /etc/containerd/config.toml
+    executable: /bin/bash
+  changed_when: false

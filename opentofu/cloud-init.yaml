@@ -4,6 +4,12 @@ fdqn: ${hostname}.localdomain
 prefer_fqdn_over_hostname: false
 create_hostname_file: true
 
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: true
+
 ssh_pwauth: false
 disable_root: true
 allow_public_ssh_keys: true
@@ -21,6 +27,7 @@ packages:
 - python3-libdnf5
 - vim
 - firewalld
+- containerd
 
 yum_repos:
   kubernetes:

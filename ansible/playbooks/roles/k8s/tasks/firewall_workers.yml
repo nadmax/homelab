@@ -1,0 +1,11 @@
+- name: Open ports using firewalld
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    permanent: true
+    state: enabled
+  loop:
+    - 10250/tcp
+    - 30000-32767/tcp
+    - 8472/udp
+    - 179/tcp
+  notify: Reload firewalld

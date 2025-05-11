@@ -1,0 +1,12 @@
+- name: Install Kubernetes packages
+  ansible.builtin.dnf:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+
+- name: Install tc (iproute) tool
+  ansible.builtin.dnf:
+    name: iproute-tc
+    state: present

@@ -1,0 +1,13 @@
+- name: Reset any existing Kubernetes state
+  ansible.builtin.shell: |
+    kubeadm reset -f
+    rm -rf /etc/cni/net.d /var/lib/cni /var/lib/kubelet /etc/kubernetes
+    systemctl restart containerd
+    systemctl restart kubelet
+  changed_when: false
+
+- name: Join worker node to Kubernetes cluster
+  ansible.builtin.shell: |
+    {{ hostvars['controlplane'].kubeadm_join_cmd }}
+  when: hostvars['controlplane'].kubeadm_join_cmd is defined
+  changed_when: false

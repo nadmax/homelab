@@ -1,0 +1,21 @@
+- name: Install Kubernetes
+  ansible.builtin.import_tasks: install.yml
+
+- name: Configure Kubernetes
+  ansible.builtin.import_tasks: configure.yml
+
+- name: Open firewall ports on masters
+  when: "'masters' in group_names"
+  ansible.builtin.import_tasks: firewall_master.yml
+
+- name: Initialize master node
+  when: "'masters' in group_names"
+  ansible.builtin.import_tasks: init_master.yml
+
+- name: Open firewall ports on workers
+  when: "'workers' in group_names"
+  ansible.builtin.import_tasks: firewall_workers.yml
+
+- name: Join workers to cluster
+  when: "'workers' in group_names"
+  ansible.builtin.import_tasks: join_workers.yml

@@ -11,7 +11,7 @@ resource "libvirt_domain" "vms" {
 
   network_interface {
     network_name   = var.network_name
-    wait_for_lease = false
+    wait_for_lease = true
   }
 
   graphics {

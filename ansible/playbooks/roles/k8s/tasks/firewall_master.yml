@@ -1,0 +1,13 @@
+- name: Open required Kubernetes ports on controlplane
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    permanent: true
+    state: enabled
+  loop:
+    - 6443/tcp
+    - 10250/tcp
+    - 10251/tcp
+    - 10252/tcp
+    - 8472/udp
+    - 179/tcp
+  notify: Reload firewalld
