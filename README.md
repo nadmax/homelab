@@ -19,7 +19,11 @@ Each VM is provisioned, configured, and container-ready with Docker and Kubernet
 
 ## Documentation
 The documentation is available [here](https://github.com/nadmax/homelab/blob/master/docs).  
-**Please read it carefully!**
+**Please read it carefully!** 
+
+## Contributing
+All contributions are welcome and appreciated.  
+Please make sur to read the [contributing guide](https://github.com/nadmax/homelab/blob/master/CONTRIBUTING.md) for guidelines before submitting a pull request. 
 
 ## Planned Improvements
 - 🔴 **Centralized Logging**: Loki?
