@@ -7,7 +7,6 @@
   changed_when: false
 
 - name: Join worker node to Kubernetes cluster
-  ansible.builtin.shell: |
-    {{ hostvars['controlplane'].kubeadm_join_cmd }}
-  when: hostvars['controlplane'].kubeadm_join_cmd is defined
+  ansible.builtin.command: "{{ hostvars[groups['masters'][0]]['kubeadm_join_cmd'] }}"
+  when: hostvars[groups['masters'][0]]['kubeadm_join_cmd'] is defined
   changed_when: false

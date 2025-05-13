@@ -16,9 +16,10 @@ Each VM is provisioned, configured, and container-ready with Docker and Kubernet
 - [Ansible](https://docs.ansible.com/ansible/latest/index.html): Automates k8s cluster setup and configuration tasks  
 - [Docker](https://www.docker.com/): Container runtime for workloads  
 - [Kubernetes](https://kubernetes.io/): Container orchestration for deploying and managing applications  
+- [Just](https://just.systems/): Command runner to simplify project automation and scripting  
 
 ## Documentation
-The documentation is available [here](https://github.com/nadmax/homelab/blob/master/docs).  
+The documentation is available [here](https://github.com/nadmax/homelab/blob/master/docs/README.md).  
 **Please read it carefully!** 
 
 ## Contributing

@@ -3,6 +3,7 @@
     port: "{{ item }}"
     permanent: true
     state: enabled
+    immediate: true
   loop:
     - 6443/tcp
     - 10250/tcp

@@ -4,3 +4,5 @@
 *vault*
 *secrets
 *.passwd
+*.json
+.os-type

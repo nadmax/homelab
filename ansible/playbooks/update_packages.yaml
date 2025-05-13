@@ -1,8 +1,8 @@
-- name: Upgrade Packages
+- name: Update Packages
   hosts: all
   gather_facts: true
   become: true
   vars_files:
     - vaults/vault
   roles:
-    - packages_update
+    - update_packages
