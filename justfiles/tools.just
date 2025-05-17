@@ -24,18 +24,18 @@ install-opentofu:
 
     OS=$(cat .os-type)
     if [ "$OS" = "Debian" ]; then 
-        install -m 0755 -d /etc/apt/keyrings 
-        curl -fsSL https://get.opentofu.org/opentofu.gpg | tee /etc/apt/keyrings/opentofu.gpg >/dev/null 
-        curl -fsSL https://packages.opentofu.org/opentofu/tofu/gpgkey | gpg --no-tty --batch --dearmor -o /etc/apt/keyrings/opentofu-repo.gpg >/dev/null 
-        chmod a+r /etc/apt/keyrings/opentofu.gpg /etc/apt/keyrings/opentofu-repo.gpg 
-        echo "deb [signed-by=/etc/apt/keyrings/opentofu.gpg,/etc/apt/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main" | tee /etc/apt/sources.list.d/opentofu.list > /dev/null 
-        echo "deb-src [signed-by=/etc/apt/keyrings/opentofu.gpg,/etc/apt/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main" | tee -a /etc/apt/sources.list.d/opentofu.list > /dev/null 
-        chmod a+r /etc/apt/sources.list.d/opentofu.list 
-        apt update 
-        apt install -y tofu 
+        sudo install -m 0755 -d /etc/apt/keyrings 
+        curl -fsSL https://get.opentofu.org/opentofu.gpg | sudo tee /etc/apt/keyrings/opentofu.gpg >/dev/null 
+        curl -fsSL https://packages.opentofu.org/opentofu/tofu/gpgkey | sudo gpg --no-tty --batch --dearmor -o /etc/apt/keyrings/opentofu-repo.gpg >/dev/null 
+        sudo chmod a+r /etc/apt/keyrings/opentofu.gpg /etc/apt/keyrings/opentofu-repo.gpg 
+        echo "deb [signed-by=/etc/apt/keyrings/opentofu.gpg,/etc/apt/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main" | sudo tee /etc/apt/sources.list.d/opentofu.list > /dev/null 
+        echo "deb-src [signed-by=/etc/apt/keyrings/opentofu.gpg,/etc/apt/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main" | sudo tee -a /etc/apt/sources.list.d/opentofu.list > /dev/null 
+        sudo chmod a+r /etc/apt/sources.list.d/opentofu.list 
+        sudo apt update 
+        sudo apt install -y tofu 
     elif [ "$OS" = "RHEL" ]; then 
-        echo '[opentofu]' > /etc/yum.repos.d/opentofu.repo
-        echo 'name=opentofu' >> /etc/yum.repos.d/opentofu.repo
+        echo '[opentofu]' | sudo tee /etc/yum.repos.d/opentofu.repo
+        echo 'name=opentofu' | sudo tee -a /etc/yum.repos.d/opentofu.repo
         echo 'baseurl=https://packages.opentofu.org/opentofu/tofu/rpm_any/rpm_any/$basearch' >> /etc/yum.repos.d/opentofu.repo
         echo 'repo_gpgcheck=0' >> /etc/yum.repos.d/opentofu.repo
         echo 'gpgcheck=1' >> /etc/yum.repos.d/opentofu.repo

@@ -3,7 +3,7 @@ setup-inventory:
 
 setup-vault-pass:
     @echo "Enter your user password (input will be hidden):"
-    read -s PASSWORD && printf "%s" "$PASSWORD" > .vault_pass && chmod 600 .vault_pass && \
+    @read -s PASSWORD && printf "%s" "$PASSWORD" > .vault_pass && chmod 600 .vault_pass && \
     echo ".vault_pass file created with user password."
 
 setup-vault:
