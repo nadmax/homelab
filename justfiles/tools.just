@@ -1,3 +1,5 @@
+set unstable
+
 os := ""
 
 [script("sh")]
