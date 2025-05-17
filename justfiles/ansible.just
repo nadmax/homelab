@@ -2,17 +2,22 @@ setup-inventory:
     @tofu -chdir={{dir}} output -json vm_ipv4_addresses > ansible/inventory/inventory.json
 
 setup-vault-pass:
+    @if [ -f .vault_pass ]; then \
+        echo "File .vault_pass already exists. Aborting."; \
+        exit 1; \
+    fi
+
     @echo "Enter your user password (input will be hidden):"
-    read -s PASSWORD && printf "%s" "$PASSWORD" > .vault_pass && chmod 600 .vault_pass && \
+    @read -s PASSWORD && printf "%s" "$PASSWORD" > .vault_pass && chmod 600 .vault_pass && \
     echo ".vault_pass file created with user password."
 
-setup-vault:
-    @echo "Enter a vault password (used to encrypt the vault file, input will be hidden):"
-    @read -s VAULT_PASSWORD && printf "%s" "$VAULT_PASSWORD" > .vault_pass && chmod 600 .vault_pass && \
-    echo ".vault_pass file created."
+setup-vault: setup-vault-pass
+    @if [ -f ansible/playbooks/vaults/vault ]; then \
+        echo "File ansible/playbooks/vaults/vault already exists. Aborting."; \
+        exit 1; \
+    fi
 
     @mkdir -p ansible/playbooks/vaults
-
     @echo "Enter the remote user password (used for sudo, input will be hidden):"
     @read -s USER_PASSWORD && \
     echo "ansible_become_pass: \"$USER_PASSWORD\"" > /tmp/vault_plain.yml && \
@@ -21,7 +26,7 @@ setup-vault:
     rm /tmp/vault_plain.yml && \
     echo "Vault created at ansible/playbooks/vaults/vault"
 
-setup-k8s:
+k8s:
     @ansible-playbook ansible/playbooks/k8s.yaml
 
 update-packages:

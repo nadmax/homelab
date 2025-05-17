@@ -25,6 +25,3 @@ The documentation is available [here](https://github.com/nadmax/homelab/blob/mas
 ## Contributing
 All contributions are welcome and appreciated.  
 Please make sur to read the [contributing guide](https://github.com/nadmax/homelab/blob/master/CONTRIBUTING.md) for guidelines before submitting a pull request. 
-
-## Planned Improvements
-- 🔴 **Centralized Logging**: Loki?

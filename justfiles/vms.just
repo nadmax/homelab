@@ -15,7 +15,7 @@ delete-volumes:
     volumes=$(virsh vol-list default | awk 'NR > 2 {print $1}')
     if [ -z "$$volumes" ]; then
         echo "No volumes found in pool default."
-        exit 0
+        exit 1
     fi
 
     for vol in $volumes; do 
@@ -29,4 +29,4 @@ delete-vms:
     @virsh undefine node01
     @virsh undefine node02
 
-reset-vms: stop-vms delete-vms delete-volumes
+kill-vms: stop-vms delete-vms delete-volumes
