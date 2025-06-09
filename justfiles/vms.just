@@ -1,3 +1,6 @@
+show-vms:
+  @virsh list
+
 start-vms:
     @echo "Starting VMs..."
     @virsh start controlplane
