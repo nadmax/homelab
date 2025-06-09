@@ -26,9 +26,11 @@ tofu-destroy flag="":
         tofu -chdir={{dir}} destroy; \
     fi
 
+tofu-show:
+  @tofu -chdir={{dir}} show
+
 tofu-clean:
     cd {{dir}} && rm -f *.lock terraform.*
-
 
 generate-passwd:
     @if [ -f opentofu/.passwd ]; then \

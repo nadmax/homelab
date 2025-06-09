@@ -2,3 +2,4 @@
   ansible.builtin.dnf:
     name: "*"
     state: latest
+    disable_gpg_check: "{{ disable_gpg_check | default(omit) }}"
