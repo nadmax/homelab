@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vmalert-rules
+data:
+  node_alerts.yaml: |
+    groups:
+    - name: node
+      rules:
+      - alert: NodeHighCPU
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU usage on {{ $labels.instance }}
+          description: "CPU usage is > 85% for more than 2 minutes."
