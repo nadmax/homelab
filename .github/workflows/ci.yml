@@ -1,0 +1,13 @@
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  ansible:
+    name: Ansible
+    uses: ./.github/workflows/ansible.yml
+
+  opentofu:
+    name: OpenTofu
+    uses: ./.github/workflows/opentofu.yml
