@@ -108,6 +108,11 @@ install-virt-packages:
         exit 1
     fi
 
+    echo "Creating default storage pool..."
+    sudo virsh pool-define-as --name default --type dir --target /var/lib/libvirt/images
+    sudo virsh pool-autostart default
+    sudo virsh pool-start default
+
     echo "Setup completed successfully!"
     echo "You can now run virt-manager with: virt-manager"
     echo "NOTE: You may need to log out and back in for group changes to take effect."
