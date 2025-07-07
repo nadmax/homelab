@@ -9,11 +9,81 @@ on:
 
 jobs:
   fmt:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: opentofu/setup-opentofu@v1
-      - name: Run tofu fmt
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Check format
         run: tofu fmt -check -write=false -diff
         continue-on-error: false
 
+  validate:
+    runs-on: ubuntu-latest
+    needs: fmt
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Create .passwd
+        run: touch .passwd
+
+      - name: Init configuration
+        run: tofu init
+
+      - name: Validate configuration
+        run: tofu validate
+
+  plan:
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Create empty .passwd
+        run: touch .passwd
+
+      - name: Create empty SSH public key
+        run: |
+          mkdir ~/.ssh
+          touch ~/.ssh/id_rsa.pub
+
+      - name: Init configuration
+        run: tofu init
+
+      - name: Output configuration plan
+        run: tofu plan
+
+  apply:
+    runs-on: ubuntu-latest
+    needs: plan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Create empty .passwd
+        run: touch .passwd
+
+      - name: Create empty SSH public key
+        run: |
+          mkdir ~/.ssh
+          touch ~/.ssh/id_rsa.pub
+
+      - name: Init configuration
+        run: tofu init
+
+      - name: Apply configuration
+        run: tofu apply --auto-approve
