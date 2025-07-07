@@ -1,12 +1,12 @@
 terraform {
+  required_version = "v1.10.2"
   required_providers {
-    libvirt = {
-      source  = "dmacvicar/libvirt"
-      version = "0.8.3"
+    incus = {
+      source  = "lxc/incus"
+      version = "0.3.1"
     }
   }
 }
 
-provider "libvirt" {
-  uri = "qemu:///system"
+provider "incus" {
 }

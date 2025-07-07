@@ -9,11 +9,52 @@ on:
 
 jobs:
   fmt:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: opentofu/setup-opentofu@v1
-      - name: Run tofu fmt
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Check format
         run: tofu fmt -check -write=false -diff
         continue-on-error: false
 
+  validate:
+    runs-on: ubuntu-latest
+    needs: fmt
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Init configuration
+        run: tofu init
+
+      - name: Validate configuration
+        run: tofu validate
+        env:
+          TF_VAR_ssh_public_key_content: ${{ secrets.SSH_PUBLIC_KEY_CONTENT }}
+          TF_VAR_hashed_password: ${{ secrets.HASHED_PASSWORD }}
+
+  plan:
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Init configuration
+        run: tofu init
+
+      - name: Output configuration plan
+        run: tofu plan
+        env:
+          TF_VAR_ssh_public_key_content: ${{ secrets.SSH_PUBLIC_KEY_CONTENT }}
+          TF_VAR_hashed_password: ${{ secrets.HASHED_PASSWORD }}

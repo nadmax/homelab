@@ -6,14 +6,14 @@ Perfect for learning, testing, and tinkering.
 
 ## Overview
 
-The architecture consists of **three virtual machines** orchestrated into a Kubernetes cluster.  
+The architecture consists of **three Incus instances** orchestrated into a Kubernetes cluster.  
 Each VM is provisioned, configured, and container-ready with Docker and Kubernetes.
 
 **Tech Stack:**
 
-- [OpenTofu](https://opentofu.org/): Infrastructure as Code (IaC) to define and deploy VMs  
-- [Cloud-init](https://cloudinit.readthedocs.io/en/latest/index.html): Associated with OpenTofu to define VMs users and metadatas
-- [libvirt](https://registry.terraform.io/providers/dmacvicar/libvirt/latest/docs):  Local virtual machine management  
+- [OpenTofu](https://opentofu.org/): Infrastructure as Code (IaC) to define and deploy instances  
+- [Cloud-init](https://cloudinit.readthedocs.io/en/latest/index.html): Associated with OpenTofu to define users and metadatas
+- [Incus](https://registry.terraform.io/providers/lxc/incus/latest/docs): Incus provider to manage instances
 - [Ansible](https://docs.ansible.com/ansible/latest/index.html): Automates k8s cluster setup and configuration tasks  
 - [Docker](https://www.docker.com/): Container runtime for workloads  
 - [Kubernetes](https://kubernetes.io/): Container orchestration for deploying and managing applications  

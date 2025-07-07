@@ -1,45 +1,64 @@
-variable "qcow2_path" {
-  description = "Link to Fedora Cloud image"
+variable "image_alias" {
+  description = "Incus image alias or fingerprint"
   type        = string
-  default     = "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Cloud/x86_64/images/Fedora-Cloud-Base-Generic-42-1.1.x86_64.qcow2"
+  default     = "fedora/42/cloud"
 }
 
-variable "disk_size" {
-  description = "Size of each VM disk in GiB"
-  type        = number
-  default     = 100 * 1024 * 1024 * 1024
-}
-
-variable "vm_definitions" {
-  description = "Map of VMs with memory and vCPU settings"
-  type = map(object({
-    memory = number
-    vcpu   = number
-  }))
-  default = {
-    controlplane = {
-      memory = 8192
-      vcpu   = 4
-    }
-    node01 = {
-      memory = 4096
-      vcpu   = 2
-    }
-    node02 = {
-      memory = 4096
-      vcpu   = 2
-    }
-  }
-}
-
-variable "network_name" {
-  description = "Libvirt network name"
+variable "storage_pool" {
+  description = "Incus storage pool name"
   type        = string
   default     = "default"
 }
 
-variable "ssh_public_key" {
-  description = "Path to the SSH public key"
+variable "instances" {
+  description = "Map of instances with memory and CPU settings"
+  type = map(object({
+    memory = string
+    cpu    = string
+  }))
+  default = {
+    controlplane = {
+      memory = "8GiB"
+      cpu    = "4"
+    }
+    node01 = {
+      memory = "4GiB"
+      cpu    = "2"
+    }
+    node02 = {
+      memory = "4GiB"
+      cpu    = "2"
+    }
+  }
+}
+
+variable "hashed_password" {
+  description = "Hashed password for user account"
   type        = string
-  default     = "~/.ssh/id_rsa.pub"
+  default     = ""
+  sensitive   = true
+}
+
+variable "network_name" {
+  description = "Incus network name"
+  type        = string
+  default     = "incusbr0"
+}
+
+variable "password_file_path" {
+  description = "Path to the hashed password file (used if hashed_password is empty)"
+  type        = string
+  default     = ".passwd"
+}
+
+variable "ssh_public_key_content" {
+  description = "SSH public key content"
+  type        = string
+  default     = ""
+}
+
+variable "root_disk_size" {
+  description = "Size of root disk (e.g., '100GiB')"
+  type        = string
+  default     = "100GiB"
 }
