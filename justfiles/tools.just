@@ -76,45 +76,117 @@ install-ansible:
     pip3 install ansible
 
 [script("sh")]
-install-virt-packages:
+install-incus-packages:
     OS=$(cat .os-type)
-    echo "Installing virtualization packages..."
+    echo "Installing Incus packages..."
+
     if [ "$OS" = "Debian" ]; then
         sudo apt update
-        sudo apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager
-        sudo apt install -y virtinst libosinfo-bin
+        sudo apt install -y curl gnupg2 software-properties-common
+
+        curl -fsSL https://pkgs.zabbly.com/key.asc | sudo gpg --dearmor -o /usr/share/keyrings/zabbly.gpg
+        echo "deb [signed-by=/usr/share/keyrings/zabbly.gpg] https://pkgs.zabbly.com/incus/stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/zabbly-incus-stable.list
+
+        sudo apt update
+        sudo apt install -y incus
+
     elif [ "$OS" = "RHEL" ]; then
-        sudo dnf install -y @virtualization
+        sudo dnf install -y curl gnupg2
+
+        if [ -f /etc/redhat-release ]; then
+            if grep -q "release 9" /etc/redhat-release; then
+                RHEL_VERSION="9"
+            elif grep -q "release 8" /etc/redhat-release; then
+                RHEL_VERSION="8"
+            else
+                echo "Unsupported RHEL version. Trying with version 9..."
+                RHEL_VERSION="9"
+            fi
+        else
+            RHEL_VERSION="9"
+        fi
+
+        echo '[zabbly-incus-stable]' | sudo tee /etc/yum.repos.d/zabbly-incus.repo
+        echo 'name=Zabbly Incus Stable' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo "baseurl=https://pkgs.zabbly.com/incus/stable/rpm/el${RHEL_VERSION}/\$basearch" | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'repo_gpgcheck=0' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'gpgcheck=1' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'enabled=1' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'gpgkey=https://pkgs.zabbly.com/key.asc' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'sslverify=1' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'sslcacert=/etc/pki/tls/certs/ca-bundle.crt' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'metadata_expire=300' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo '' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+
+        echo '[zabbly-incus-stable-source]' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'name=Zabbly Incus Stable Source' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo "baseurl=https://pkgs.zabbly.com/incus/stable/rpm/el${RHEL_VERSION}/SRPMS" | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'repo_gpgcheck=0' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'gpgcheck=1' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'enabled=1' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'gpgkey=https://pkgs.zabbly.com/key.asc' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'sslverify=1' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'sslcacert=/etc/pki/tls/certs/ca-bundle.crt' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+        echo 'metadata_expire=300' | sudo tee -a /etc/yum.repos.d/zabbly-incus.repo
+
+        sudo dnf update
+        sudo dnf install -y incus
     fi
 
-    sudo usermod -aG libvirt $USER || echo "Could not add user to libvirt group. You may need to add your user manually."
+    sudo usermod -aG incus $USER || echo "Could not add user to incus group. You may need to add your user manually."
 
-    echo "Starting and enabling libvirt service..."
-    sudo systemctl start libvirtd
-    sudo systemctl enable libvirtd
+    echo "Starting and enabling Incus service..."
+    sudo systemctl start incus
+    sudo systemctl enable incus
 
-    if sudo systemctl is-active --quiet libvirtd; then
-        echo "Libvirt service is running."
+    sleep 2
+
+    if sudo incus admin init --minimal 2>/dev/null; then
+        echo "Incus service is running and initialized."
     else
-        echo "Failed to start libvirt service. Please check the system logs."
-        exit 1
+        echo "Incus service may not be running properly. Let's try to initialize it..."
+
+        echo "Initializing Incus with default settings..."
+        sudo incus admin init --auto
+
+        if [ $? -eq 0 ]; then
+            echo "Incus initialized successfully."
+        else
+            echo "Failed to initialize Incus. Please check the system logs."
+            exit 1
+        fi
     fi
 
-    echo "Verifying KVM module..."
-    if lsmod | grep -q kvm; then
-        echo "KVM module is loaded."
+    echo "Verifying virtualization support..."
+    if [ -e /dev/kvm ]; then
+        echo "KVM is available for hardware acceleration."
     else
-        echo "KVM module is not loaded. Please check if your CPU supports virtualization and if it's enabled in BIOS." 
-        exit 1
+        echo "KVM is not available. VMs will run without hardware acceleration."
     fi
 
-    echo "Creating default storage pool..."
-    sudo virsh pool-define-as --name default --type dir --target /var/lib/libvirt/images
-    sudo virsh pool-autostart default
-    sudo virsh pool-start default
+    echo "Setting up default storage pool and network..."
+    if ! sudo incus storage list | grep -q "default"; then
+        echo "Creating default storage pool..."
+        sudo incus storage create default dir
+    fi
+
+    if ! sudo incus network list | grep -q "incusbr0"; then
+        echo "Creating default network bridge..."
+        sudo incus network create incusbr0
+    fi
+
+    echo "Adding common cloud images..."
+    sudo incus image copy images:fedora/39/cloud local: --alias fedora/39/cloud || echo "Failed to copy Fedora image"
+    sudo incus image copy images:ubuntu/22.04/cloud local: --alias ubuntu/22.04/cloud || echo "Failed to copy Ubuntu image"
 
     echo "Setup completed successfully!"
-    echo "You can now run virt-manager with: virt-manager"
+    echo "Available commands:"
+    echo "  incus list                    - List instances"
+    echo "  incus image list             - List available images"
+    echo "  incus launch <image> <name>  - Create and start instance"
+    echo "  incus exec <name> bash       - Access instance shell"
+    echo ""
     echo "NOTE: You may need to log out and back in for group changes to take effect."
+    echo "Test with: incus version"
 
-install-tools: detect-os install-virt-packages install-opentofu install-ansible
+install-tools: detect-os install-incus-packages install-opentofu install-ansible
