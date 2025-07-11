@@ -1,5 +1,8 @@
 dir := "opentofu"
 
+tofu-fmt:
+    @tofu -chdir={{dir}} fmt
+
 tofu-init:
     @tofu -chdir={{dir}} init
 
@@ -9,25 +12,23 @@ tofu-validate:
 tofu-plan:
     @tofu -chdir={{dir}} plan
 
-tofu-apply flag="":
-    @if [ "{{flag}}" = "-y" ]; then \
-        tofu -chdir={{dir}} apply --auto-approve; \
-    else \
-        tofu -chdir={{dir}} apply; \
-    fi
+tofu-apply:
+    @tofu -chdir={{dir}} apply
+
+tofu-applyf: 
+    @tofu -chdir={{dir}} apply --auto-approve
 
 tofu-output:
     @tofu -chdir={{dir}} output -json vm_ipv4_addresses
 
-tofu-destroy flag="":
-    @if [ "{{flag}}" = "-y" ]; then \
-        tofu -chdir={{dir}} destroy --auto-approve; \
-    else \
-        tofu -chdir={{dir}} destroy; \
-    fi
+tofu-destroy:
+    @tofu -chdir={{dir}} destroy
+
+tofu-destroyf:
+    @tofu -chdir={{dir}} destroy --auto-approve
 
 tofu-show:
-  @tofu -chdir={{dir}} show
+    @tofu -chdir={{dir}} show
 
 tofu-clean:
     cd {{dir}} && rm -f *.lock terraform.*
@@ -43,4 +44,4 @@ generate-passwd:
     printf "%s" "$HASHED" > opentofu/.passwd && \
     echo "Password hash saved to opentofu/.passwd"
 
-tofu-provide flag="": generate-passwd tofu-init tofu-validate tofu-plan tofu-apply
+tofu-provide flag="": generate-passwd tofu-init tofu-validate tofu-plan tofu-applyf

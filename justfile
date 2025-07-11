@@ -1,13 +1,13 @@
 import 'justfiles/ansible.just'
 import 'justfiles/tofu.just'
 import 'justfiles/tools.just'
-import 'justfiles/vms.just'
 
 help:
   @echo "Available commands:"
 
   @echo ""
   @echo "=== OpenTofu Commands ==="
+  @echo "  tofu-fmt            - Format OpenTofu configuration code"
   @echo "  tofu-init           - Initialize OpenTofu configuration"
   @echo "  tofu-validate       - Validate OpenTofu configuration"
   @echo "  tofu-plan           - Show OpenTofu execution plan"
@@ -17,16 +17,7 @@ help:
   @echo "  tofu-output         - Output OpenTofu VM IP addresses in JSON"
   @echo "  tofu-clean          - Clean OpenTofu lock, state and temp files"
   @echo "  tofu-provide        - Run full OpenTofu provisioning workflow"
-
-  @echo ""
-  @echo "=== VM Management ==="
-  @echo "  show-vms            - Display VM states (controlplane, node01, node02)"
-  @echo "  start-vms           - Start VMs (controlplane, node01, node02)"
-  @echo "  stop-vms            - Shutdown VMs gracefully"
-  @echo "  delete-volumes      - Delete all libvirt volumes in the default pool"
-  @echo "  delete-vms          - Undefine/remove VM configurations"
-  @echo "  kill-vms            - Stop and delete VMs and volumes (stop-vms, delete-vms, delete-volumes)"
-  
+ 
   @echo ""
   @echo "=== Ansible & Vault ==="
   @echo "  setup-inventory     - Export VM IPs from OpenTofu for Ansible inventory"
@@ -66,4 +57,4 @@ clean:
 
 deploy: install-tools tofu-provide setup-inventory setup-vault
 init-cluster: update-packages k8s
-destroy: tofu-destroy clean
+destroy: tofu-destroyf clean

@@ -13,7 +13,7 @@ Each VM is provisioned, configured, and container-ready with Docker and Kubernet
 
 - [OpenTofu](https://opentofu.org/): Infrastructure as Code (IaC) to define and deploy instances  
 - [Cloud-init](https://cloudinit.readthedocs.io/en/latest/index.html): Associated with OpenTofu to define users and metadatas
-- [Incus](https://registry.terraform.io/providers/lxc/incus/latest/docs): Incus provider to manage instances
+- [Incus](https://search.opentofu.org/provider/lxc/incus/latest): Incus provider to manage instances
 - [Ansible](https://docs.ansible.com/ansible/latest/index.html): Automates k8s cluster setup and configuration tasks  
 - [Docker](https://www.docker.com/): Container runtime for workloads  
 - [Kubernetes](https://kubernetes.io/): Container orchestration for deploying and managing applications  

@@ -28,6 +28,9 @@ packages:
 - vim
 - firewalld
 - containerd
+- selinux-policy-targeted
+- policycoreutils-python-utils
+
 
 yum_repos:
   kubernetes:
@@ -37,6 +40,33 @@ yum_repos:
     gpgkey: https://pkgs.k8s.io/core:/stable:/v1.33/rpm/repodata/repomd.xml.key
     enabled: true
 yum_repo_dir: /etc/yum.repos.d/
+
+bootcmd:
+  - echo 'SELINUX=permissive' > /etc/selinux/config
+  - setenforce 0
+
+runcmd:
+  - setsebool -P container_manage_cgroup true
+  - setsebool -P virt_use_nfs true
+  - setsebool -P virt_use_samba true
+  
+  - modprobe br_netfilter
+  - modprobe ip_tables
+  - modprobe ip6_tables
+  - modprobe overlay
+  
+  - echo 'br_netfilter' >> /etc/modules-load.d/k8s.conf
+  - echo 'ip_tables' >> /etc/modules-load.d/k8s.conf
+  - echo 'ip6_tables' >> /etc/modules-load.d/k8s.conf
+  - echo 'overlay' >> /etc/modules-load.d/k8s.conf
+  
+  - echo 'net.bridge.bridge-nf-call-iptables = 1' >> /etc/sysctl.d/k8s.conf
+  - echo 'net.bridge.bridge-nf-call-ip6tables = 1' >> /etc/sysctl.d/k8s.conf
+  - echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.d/k8s.conf
+  - sysctl --system
+  
+  - systemctl enable --now containerd
+  - systemctl enable --now firewalld
 
 chpasswd:
   expire: false

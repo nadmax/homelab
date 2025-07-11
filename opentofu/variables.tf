@@ -7,7 +7,7 @@ variable "image_alias" {
 variable "storage_pool" {
   description = "Incus storage pool name"
   type        = string
-  default     = "default"
+  default     = "pool"
 }
 
 variable "instances" {
@@ -42,7 +42,7 @@ variable "hashed_password" {
 variable "network_name" {
   description = "Incus network name"
   type        = string
-  default     = "incusbr0"
+  default     = "homelab"
 }
 
 variable "password_file_path" {
@@ -55,10 +55,4 @@ variable "ssh_public_key_content" {
   description = "SSH public key content"
   type        = string
   default     = ""
-}
-
-variable "root_disk_size" {
-  description = "Size of root disk (e.g., '100GiB')"
-  type        = string
-  default     = "100GiB"
 }
