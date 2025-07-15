@@ -1,24 +1,8 @@
 set unstable
 
-os := ""
-
-[script("sh")]
-detect-os:
-    if grep -qEi "debian|ubuntu" /etc/os-release; then 
-        echo "Debian" > .os-type
-    elif grep -qEi "rhel|centos|fedora|rocky|almalinux" /etc/os-release; then 
-        echo "RHEL" > .os-type
-    else 
-        echo "Unsupported OS detected. Exiting..." 
-        exit 1
-    fi
-
-    echo "Detected OS: $(cat .os-type)"
-
 [script("sh")]
 install-opentofu:
-    OS=$(cat .os-type)
-    if [ "$OS" = "Debian" ]; then 
+    if grep -qEi "debian|ubuntu" /etc/os-release; then 
         sudo install -m 0755 -d /etc/apt/keyrings 
         curl -fsSL https://get.opentofu.org/opentofu.gpg | sudo tee /etc/apt/keyrings/opentofu.gpg >/dev/null 
         curl -fsSL https://packages.opentofu.org/opentofu/tofu/gpgkey | sudo gpg --no-tty --batch --dearmor -o /etc/apt/keyrings/opentofu-repo.gpg >/dev/null 
@@ -28,7 +12,7 @@ install-opentofu:
         sudo chmod a+r /etc/apt/sources.list.d/opentofu.list 
         sudo apt update 
         sudo apt install -y tofu 
-    elif [ "$OS" = "RHEL" ]; then 
+    elif grep -qEi "rhel|centos|fedora|rocky|almalinux" /etc/os-release; then 
         echo '[opentofu]' | sudo tee /etc/yum.repos.d/opentofu.repo
         echo 'name=opentofu' | sudo tee -a /etc/yum.repos.d/opentofu.repo
         echo 'baseurl=https://packages.opentofu.org/opentofu/tofu/rpm_any/rpm_any/$basearch' >> /etc/yum.repos.d/opentofu.repo
@@ -57,13 +41,12 @@ install-opentofu:
 
 [script("sh")]
 install-ansible:
-    OS=$(cat .os-type)
     if ! command -v pip3 &> /dev/null; then 
         echo "pip3 not found, installing pip..." 
-        if [ "$OS" = "Debian" ]; then 
+        if grep -qEi "debian|ubuntu" /etc/os-release; then 
             sudo apt update 
             sudo apt install -y python3-pip 
-        elif [ "$OS" = "RHEL" ]; then 
+        elif grep -qEi "rhel|centos|fedora|rocky|almalinux" /etc/os-release; then 
             sudo dnf install -y python3-pip 
         else 
             echo "Unsupported OS detected. Exiting..." 
@@ -77,13 +60,12 @@ install-ansible:
 
 [script("sh")]
 install-virt-packages:
-    OS=$(cat .os-type)
     echo "Installing virtualization packages..."
-    if [ "$OS" = "Debian" ]; then
+    if grep -qEi "debian|ubuntu" /etc/os-release; then 
         sudo apt update
         sudo apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager
         sudo apt install -y virtinst libosinfo-bin
-    elif [ "$OS" = "RHEL" ]; then
+    elif grep -qEi "rhel|centos|fedora|rocky|almalinux" /etc/os-release; then 
         sudo dnf install -y @virtualization
     fi
 
@@ -117,4 +99,4 @@ install-virt-packages:
     echo "You can now run virt-manager with: virt-manager"
     echo "NOTE: You may need to log out and back in for group changes to take effect."
 
-install-tools: detect-os install-virt-packages install-opentofu install-ansible
+install-tools: install-virt-packages install-opentofu install-ansible

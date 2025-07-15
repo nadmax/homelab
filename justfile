@@ -38,7 +38,6 @@ help:
 
   @echo ""
   @echo "=== Tool Installation ==="
-  @echo "  detect-os           - Detect operating system type (Debian or RHEL)"
   @echo "  install-opentofu    - Install OpenTofu package based on detected OS"
   @echo "  install-ansible     - Install Ansible via pip3 or package manager"
   @echo "  install-virt-packages - Install virtualization packages and enable libvirt"
@@ -57,7 +56,6 @@ help:
 
 clean:
     @rm -rf \
-    .os-type \
     .vault_pass \
     opentofu/.passwd \
     opentofu/.terraform.lock* \
