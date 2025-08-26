@@ -1,12 +1,12 @@
 terraform {
   required_providers {
-    libvirt = {
-      source  = "dmacvicar/libvirt"
-      version = "0.8.3"
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "3.7.0"
     }
   }
 }
 
-provider "libvirt" {
-  uri = "qemu:///system"
+provider "docker" {
+    host = "unix:///var/run/docker.sock"
 }

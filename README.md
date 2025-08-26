@@ -6,14 +6,12 @@ Perfect for learning, testing, and tinkering.
 
 ## Overview
 
-The architecture consists of **three virtual machines** orchestrated into a Kubernetes cluster.  
-Each VM is provisioned, configured, and container-ready with Docker and Kubernetes.
+The lab consists of a Docker container deployed by default where inside you can run Kubernetes.
+It means you are free to deploy as many containers as you wish, as long as you have the resources to run them.
 
 **Tech Stack:**
 
-- [OpenTofu](https://opentofu.org/): Infrastructure as Code (IaC) to define and deploy VMs  
-- [Cloud-init](https://cloudinit.readthedocs.io/en/latest/index.html): Associated with OpenTofu to define VMs users and metadatas
-- [libvirt](https://registry.terraform.io/providers/dmacvicar/libvirt/latest/docs):  Local virtual machine management  
+- [OpenTofu](https://opentofu.org/): Infrastructure as Code (IaC) to define and deploy the container  
 - [Ansible](https://docs.ansible.com/ansible/latest/index.html): Automates k8s cluster setup and configuration tasks  
 - [Docker](https://www.docker.com/): Container runtime for workloads  
 - [Kubernetes](https://kubernetes.io/): Container orchestration for deploying and managing applications  
