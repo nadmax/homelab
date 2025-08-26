@@ -1,4 +1,4 @@
-dir := "tofu"
+dir := "core/tofu"
 
 tofu-init:
     @tofu -chdir={{dir}} init

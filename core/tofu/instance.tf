@@ -6,9 +6,9 @@ resource "docker_image" "debian" {
 resource "docker_container" "container" {
   image = docker_image.debian.image_id
   name = "controlplane"
-  commands = ["tail", "-f", "/dev/null"]
+  command = ["tail", "-f", "/dev/null"]
 
-  ports = {
+  ports  {
     internal = var.internal_port
     external = var.external_port
   }
