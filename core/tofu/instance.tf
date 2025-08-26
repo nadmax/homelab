@@ -1,28 +1,29 @@
-resource "libvirt_domain" "vms" {
-  for_each  = local.vms
-  name      = each.key
-  memory    = each.value.memory
-  vcpu      = each.value.vcpu
-  cloudinit = libvirt_cloudinit_disk.cloudinit[each.key].id
+resource "docker_image" "debian" {
+  name = "debian:12"
+  keep_locally = false
+}
 
-  disk {
-    volume_id = libvirt_volume.rootfs[each.key].id
+resource "docker_container" "container" {
+  image = docker_image.debian.image_id
+  name = "controlplane"
+  commands = ["tail", "-f", "/dev/null"]
+
+  ports = {
+    internal = var.internal_port
+    external = var.external_port
   }
 
-  network_interface {
-    network_name   = var.network_name
-    wait_for_lease = true
+  memory = var.memory
+  restart = var.restart_condition
+
+  networks_advanced {
+    name = "bridge"
   }
 
-  graphics {
-    type        = "vnc"
-    listen_type = "address"
-    autoport    = true
-  }
-
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
+  healthcheck {
+    test = ["CMD", "echo", "healthy"]
+    interval = "30s"
+    timeout = "3s"
+    retries = 3
   }
 }

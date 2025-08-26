@@ -1,7 +1,0 @@
-- name: Kubernetes Setup
-  hosts: all
-  become: true
-  vars_files:
-    - vaults/vault
-  roles:
-    - k8s
