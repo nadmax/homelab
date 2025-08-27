@@ -17,12 +17,13 @@ help:
   @echo "=== Tools Installation ==="
   @echo "  install-opentofu    - Install OpenTofu package based on host OS"
   @echo "  install-docker      - Install Docker engine and enable it"
-  @echo "  install             - Install required tools (opentofu, docker) based on host OS"
+  @echo "  install-buildah     - Install Buildah package"
+  @echo "  install             - Install required tools (opentofu, docker, buildah) based on host OS"
 
   @echo ""
   @echo "=== Composite Workflows ==="
-  @echo "  deploy              - Install tools, and create the infrastructure"
-  @echo "  destroy             - Destroy infrastructure and clean up files"
+  @echo "  deploy              - Install tools, and create the lab"
+  @echo "  destroy             - Destroy the lab and clean up files"
 
 
 clean:

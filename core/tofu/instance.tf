@@ -1,20 +1,26 @@
-resource "docker_image" "debian" {
-  name = "debian:12"
+resource "docker_image" "debian_k3s" {
+  name         = "rancher/k3s:v1.32.8-k3s1-amd64"
   keep_locally = false
 }
 
 resource "docker_container" "container" {
-  image = docker_image.debian.image_id
+  image = docker_image.debian_k3s.image_id
   name = "controlplane"
-  command = ["tail", "-f", "/dev/null"]
+  command = ["server", "--disable=traefik"]
 
   ports  {
-    internal = var.internal_port
-    external = var.external_port
+    internal = var.docker_internal_port
+    external = var.docker_external_port
+  }
+
+  ports {
+    internal = var.k8s_internal_port
+    external = var.k8s_external_port
   }
 
   memory = var.memory
   restart = var.restart_condition
+  privileged = true
 
   networks_advanced {
     name = "bridge"
@@ -23,7 +29,7 @@ resource "docker_container" "container" {
   healthcheck {
     test = ["CMD", "echo", "healthy"]
     interval = "30s"
-    timeout = "3s"
-    retries = 3
+    timeout = "5s"
+    retries = 5
   }
 }
