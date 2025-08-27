@@ -54,7 +54,7 @@ install-docker:
         echo "Docker not found. Installing..."
         if grep -qEi "debian|ubuntu" /etc/os-release; then
             sudo apt update
-            sudo apt install ca-certificates curl
+            sudo apt install -y ca-certificates curl
             sudo install -m 0755 -d /etc/apt/keyrings
             sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
             sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -64,14 +64,29 @@ install-docker:
             $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
             sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
             sudo apt update
-            sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
         elif grep -qEi "rhel|centos|fedora|rocky|almalinux" /etc/os-release; then
             sudo dnf -y install dnf-plugins-core
             sudo dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-            sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
         fi
     fi
 
     sudo systemctl enable --now docker
 
-install: install-opentofu install-docker
+[script("sh")]
+install-buildah:
+    if command -v buildah >/dev/null 2>&1; then
+        echo "Buildah is already installed"
+        echo "Skipping installation..."
+    else
+        echo "Buildah not found. Installing..."
+        if grep -qEi "debian|ubuntu" /etc/os-release; then
+            sudo apt update
+            sudo apt install buildah
+        elif grep -qEi "rhel|centos|fedora|rocky|almalinux" /etc/os-release; then
+            sudo dnf -y install buildah
+        fi
+    fi
+
+install: install-opentofu install-docker install-buildah
