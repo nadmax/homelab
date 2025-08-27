@@ -2,12 +2,94 @@ name: CI
 
 on:
   pull_request:
+  workflow_dispatch:
 
 jobs:
-  ansible:
-    name: Ansible
-    uses: ./.github/workflows/ansible.yml
+  fmt:
+    defaults:
+      run:
+        working-directory: core/tofu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  opentofu:
-    name: OpenTofu
-    uses: ./.github/workflows/opentofu.yml
+      - name: Install OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Check configuration format
+        run: tofu fmt -check -write=false -diff
+        continue-on-error: false
+
+  test:
+    defaults:
+      run:
+        working-directory: core
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ["1.24.5"]
+        tofu-version: ["1.10.5"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Install OpenTofu ${{ matrix.tofu-version }}
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ matrix.tofu-version }}
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go${{ hashFiles('**go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        working-directory: core/test
+        run: go mod download
+
+      - name: Run Validation test
+        working-directory: core/test
+        run: go test -v -timeout 5m -run TestTofuValidation
+
+      - name: Run Full Lab Tests
+        working-directory: core/test
+        run: go test -v -timeout 30m -parallel 2
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-go${{ matrix.go-version }}-tf${{ matrix.tofu-version }}
+          path: test/test-results.json
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Tofu Security Scan
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          soft_fail: true
+
+      - name: Run Go Security Scan
+        uses: securego/gosec@master
+        with:
+          args: "-fmt sarif -out results.sarif ./test/..."
+
+      - name: Upload Scan Results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
