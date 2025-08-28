@@ -391,6 +391,7 @@ func TestTofuValidation(t *testing.T) {
 		NoColor:      true,
 	}
 
+	tofu.Init(t, tofuOptions)
 	tofu.Validate(t, tofuOptions)
 	tofu.Plan(t, tofuOptions)
 
