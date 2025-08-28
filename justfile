@@ -26,10 +26,13 @@ help:
   @echo "  destroy             - Destroy the lab and clean up files"
 
 
+exec:
+    docker exec -it controlplane sh
+
 clean:
     @rm -rf \
     tofu/.terraform.lock* \
     tofu/terraform.tfstate*
 
-deploy: install tofu
+deploy: install tofu exec
 destroy: tofu-destroy clean
