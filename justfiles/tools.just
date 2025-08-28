@@ -74,19 +74,4 @@ install-docker:
 
     sudo systemctl enable --now docker
 
-[script("sh")]
-install-buildah:
-    if command -v buildah >/dev/null 2>&1; then
-        echo "Buildah is already installed"
-        echo "Skipping installation..."
-    else
-        echo "Buildah not found. Installing..."
-        if grep -qEi "debian|ubuntu" /etc/os-release; then
-            sudo apt update
-            sudo apt install buildah
-        elif grep -qEi "rhel|centos|fedora|rocky|almalinux" /etc/os-release; then
-            sudo dnf -y install buildah
-        fi
-    fi
-
-install: install-opentofu install-docker install-buildah
+install: install-opentofu install-docker
