@@ -5,9 +5,9 @@ resource "docker_image" "debian_k3s" {
 }
 
 resource "docker_container" "container" {
-  image   = docker_image.debian_k3s.image_id
-  name    = "controlplane"
-  command = ["server", "--disable=traefik"]
+  image          = docker_image.debian_k3s.image_id
+  name           = "controlplane"
+  command        = ["server", "--disable=traefik"]
   remove_volumes = true
 
   ports {
