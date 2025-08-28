@@ -13,8 +13,7 @@ It means you are free to deploy as many containers as you wish, as long as you h
 
 - [OpenTofu](https://opentofu.org/): Infrastructure as Code (IaC) to define and deploy the container  
 - [k3s](https://k3s.io/): A Kubernetes distribution designed for production workloads
-- [Docker](https://www.docker.com/): Container runtime for workloads  
-- [Kubernetes](https://kubernetes.io/): Container orchestration for deploying and managing applications  
+- [Docker](https://www.docker.com/): Container runtime for k3s node
 - [Just](https://just.systems/): Command runner to simplify project automation and scripting  
 
 ## Documentation

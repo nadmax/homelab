@@ -17,8 +17,7 @@ help:
   @echo "=== Tools Installation ==="
   @echo "  install-opentofu    - Install OpenTofu package based on host OS"
   @echo "  install-docker      - Install Docker engine and enable it"
-  @echo "  install-buildah     - Install Buildah package"
-  @echo "  install             - Install required tools (opentofu, docker, buildah) based on host OS"
+  @echo "  install             - Install required tools (opentofu, docker) based on host OS"
 
   @echo ""
   @echo "=== Composite Workflows ==="
