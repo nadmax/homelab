@@ -24,7 +24,7 @@ jobs:
   test:
     defaults:
       run:
-        working-directory: core
+        working-directory: core/tofu
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -55,15 +55,15 @@ jobs:
           restore-keys: ${{ runner.os }}-go-
 
       - name: Install dependencies
-        working-directory: core/test
+        working-directory: core/tofu/test
         run: go mod download
 
       - name: Run Validation test
-        working-directory: core/test
+        working-directory: core/tofu/test
         run: go test -v -timeout 5m -run TestTofuValidation
 
       - name: Run Full Lab Tests
-        working-directory: core/test
+        working-directory: core/tofu/test
         run: go test -v -timeout 30m -parallel 2
 
       - name: Upload Test Results
@@ -87,7 +87,7 @@ jobs:
       - name: Run Go Security Scan
         uses: securego/gosec@master
         with:
-          args: "-fmt sarif -out results.sarif ./core/test/"
+          args: "-fmt sarif -out results.sarif ./core/tofu/test/"
 
       - name: Upload Scan Results
         uses: github/codeql-action/upload-sarif@v3
