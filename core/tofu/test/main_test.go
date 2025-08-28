@@ -248,7 +248,7 @@ func validateK3sService(t *testing.T) {
 
 		k3sStatusCmd := sh.Command{
 			Command: "docker",
-			Args:    []string{"exec", containerName, "k3s", "kubectl", "get", "nodes", "--no-headers"},
+			Args:    []string{"exec", containerName, "kubectl", "get", "nodes", "--no-headers"},
 		}
 
 		k3sStatus, err := sh.RunCommandAndGetOutputE(t, k3sStatusCmd)
