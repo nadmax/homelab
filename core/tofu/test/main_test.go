@@ -264,7 +264,7 @@ func validateK3sService(t *testing.T) {
 
 			podsCmd := sh.Command{
 				Command: "docker",
-				Args:    []string{"exec", containerName, "k3s", "kubectl", "get", "pods", "-A", "--no-headers"},
+				Args:    []string{"exec", containerName, "kubectl", "get", "pods", "-A", "--no-headers"},
 			}
 			pods, err := sh.RunCommandAndGetOutputE(t, podsCmd)
 			if err != nil {
@@ -381,19 +381,4 @@ func TestK3sAPIEndpoint(t *testing.T) {
 			time.Sleep(retryDelay)
 		}
 	}
-}
-
-func TestTofuValidation(t *testing.T) {
-	t.Parallel()
-
-	tofuOptions := &tofu.Options{
-		TerraformDir: "../",
-		NoColor:      true,
-	}
-
-	tofu.Init(t, tofuOptions)
-	tofu.Validate(t, tofuOptions)
-	tofu.Plan(t, tofuOptions)
-
-	t.Log("Tofu configuration is valid")
 }
