@@ -87,7 +87,7 @@ jobs:
       - name: Run Go Security Scan
         uses: securego/gosec@master
         with:
-          args: "-fmt sarif -out results.sarif ./test/..."
+          args: "-fmt sarif -out results.sarif ./core/test/"
 
       - name: Upload Scan Results
         uses: github/codeql-action/upload-sarif@v2
