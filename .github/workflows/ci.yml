@@ -39,7 +39,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
-          cache-dependency-path: test/go.sum
+          cache-dependency-path: core/tofu/test/go.sum
 
       - name: Install OpenTofu ${{ matrix.tofu-version }}
         uses: opentofu/setup-opentofu@v1
