@@ -39,6 +39,12 @@ func TestK3sInfrastructure(t *testing.T) {
 	defer tofu.Destroy(t, tofuOptions)
 	tofu.InitAndApply(t, tofuOptions)
 
+	containers := sh.RunCommandAndGetOutput(t, sh.Command{
+		Command: "docker",
+		Args:    []string{"ps", "--format", "{{.Names}}"},
+	})
+	require.Contains(t, containers, containerName, "Container %s should exist after tofu apply", containerName)
+
 	t.Run("ValidateDockerImage", func(t *testing.T) {
 		validateDockerImage(t)
 	})
@@ -307,6 +313,12 @@ func TestK3sInfrastructureWithCustomVariables(t *testing.T) {
 
 	defer tofu.Destroy(t, tofuOptions)
 	tofu.InitAndApply(t, tofuOptions)
+
+	containers := sh.RunCommandAndGetOutput(t, sh.Command{
+		Command: "docker",
+		Args:    []string{"ps", "--format", "{{.Names}}"},
+	})
+	require.Contains(t, containers, containerName, "Container %s should exist after tofu apply", containerName)
 
 	memoryCmd := sh.Command{
 		Command: "docker",
