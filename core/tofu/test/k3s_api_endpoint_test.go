@@ -1,3 +1,5 @@
+//go:build !endpoint
+
 package test
 
 import (

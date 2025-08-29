@@ -57,11 +57,15 @@ jobs:
 
       - name: Run Validation test
         working-directory: core/tofu/test
-        run: go test -v -timeout 5m -run TestTofuValidation
+        run: go test -v -timeout 2m -tags validation
+
+      - name: Run Endpoint test
+        working-directory: core/tofu/test
+        run: go test -v timeout 2m -tags endpoint
 
       - name: Run Full Lab Tests
         working-directory: core/tofu/test
-        run: go test -v -timeout 30m -parallel 2
+        run: go test -v -timeout 2m -tags full
 
       - name: Upload Test Results
         if: always()
