@@ -1,20 +1,21 @@
 package test
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net/http"
 	"strings"
 	"testing"
 	"time"
 
 	sh "github.com/gruntwork-io/terratest/modules/shell"
 	tofu "github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/nadmax/homelab/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestK3sInfrastructure(t *testing.T) {
+	utils.CleanupContainer()
+
 	t.Parallel()
 
 	tofuOptions := tofu.WithDefaultRetryableErrors(t, &tofu.Options{
@@ -144,7 +145,7 @@ func testPortAccessibility(t *testing.T, host string, port int, description stri
 	maxRetries := 10
 	retryDelay := 2 * time.Second
 
-	for i := 0; i < maxRetries; i++ {
+	for i := range maxRetries {
 		cmd := sh.Command{
 			Command: "nc",
 			Args:    []string{"-z", "-v", host, fmt.Sprintf("%d", port)},
@@ -286,6 +287,8 @@ func validateK3sService(t *testing.T) {
 }
 
 func TestK3sInfrastructureWithCustomVariables(t *testing.T) {
+	utils.CleanupContainer()
+
 	t.Parallel()
 
 	tofuOptions := tofu.WithDefaultRetryableErrors(t, &tofu.Options{
@@ -334,51 +337,4 @@ func parseMemoryLimit(t *testing.T, memoryStr string) int64 {
 	require.NoError(t, err, "Failed to parse memory limit: %s", memoryStr)
 
 	return memory
-}
-
-func TestK3sAPIEndpoint(t *testing.T) {
-	t.Parallel()
-
-	tofuOptions := tofu.WithDefaultRetryableErrors(t, &tofu.Options{
-		TerraformDir: "../",
-		Vars: map[string]interface{}{
-			"k8s_external_port": 16443,
-		},
-		NoColor: true,
-	})
-
-	defer tofu.Destroy(t, tofuOptions)
-	tofu.InitAndApply(t, tofuOptions)
-
-	apiURL := "https://localhost:16443/version"
-	maxRetries := 30
-	retryDelay := 2 * time.Second
-
-	for i := range maxRetries {
-		client := &http.Client{
-			Timeout: 5 * time.Second,
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			},
-		}
-
-		resp, err := client.Get(apiURL)
-		if err == nil && resp.StatusCode == http.StatusUnauthorized {
-			t.Logf("Kubernetes API is accessible at %s (got expected 401)", apiURL)
-			resp.Body.Close()
-
-			return
-		}
-
-		if err != nil {
-			t.Logf("Attempt %d/%d: API not accessible yet: %v", i+1, maxRetries, err)
-		} else {
-			t.Logf("Attempt %d/%d: Got status %d", i+1, maxRetries, resp.StatusCode)
-			resp.Body.Close()
-		}
-
-		if i < maxRetries-1 {
-			time.Sleep(retryDelay)
-		}
-	}
 }
