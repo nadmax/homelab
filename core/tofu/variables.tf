@@ -1,3 +1,9 @@
+variable "container_name" {
+  description = "Container name"
+  type = string
+  default = "controlplane"
+}
+
 variable "memory" {
   description = "Container memory size"
   type        = number

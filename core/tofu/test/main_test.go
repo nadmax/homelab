@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	sh "github.com/gruntwork-io/terratest/modules/shell"
 	tofu "github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/nadmax/homelab/utils"
@@ -14,7 +15,8 @@ import (
 )
 
 func TestK3sInfrastructure(t *testing.T) {
-	utils.CleanupContainer()
+	containerName := fmt.Sprintf("controlplane-%s", uuid.New().String()[:8])
+	utils.CleanupContainer(containerName)
 
 	t.Parallel()
 
@@ -27,6 +29,7 @@ func TestK3sInfrastructure(t *testing.T) {
 			"k8s_internal_port":    6443,
 			"k8s_external_port":    16443,
 			"restart_condition":    "unless-stopped",
+			"container_name":       containerName,
 		},
 		NoColor: true,
 	})
@@ -39,19 +42,19 @@ func TestK3sInfrastructure(t *testing.T) {
 	})
 
 	t.Run("ValidateDockerContainer", func(t *testing.T) {
-		validateDockerContainer(t)
+		validateDockerContainer(t, containerName)
 	})
 
 	t.Run("ValidateContainerPorts", func(t *testing.T) {
-		validateContainerPorts(t, tofuOptions)
+		validateContainerPorts(t, tofuOptions, containerName)
 	})
 
 	t.Run("ValidateContainerHealth", func(t *testing.T) {
-		validateContainerHealth(t)
+		validateContainerHealth(t, containerName)
 	})
 
 	t.Run("ValidateK3sService", func(t *testing.T) {
-		validateK3sService(t)
+		validateK3sService(t, containerName)
 	})
 }
 
@@ -68,8 +71,7 @@ func validateDockerImage(t *testing.T) {
 		"Expected Docker image %s should be present locally", expectedImage)
 }
 
-func validateDockerContainer(t *testing.T) {
-	containerName := "controlplane"
+func validateDockerContainer(t *testing.T, containerName string) {
 	cmd := sh.Command{
 		Command: "docker",
 		Args:    []string{"ps", "--format", "table {{.Names}}\t{{.Status}}"},
@@ -116,8 +118,7 @@ func validateDockerContainer(t *testing.T) {
 		"Container should have unless-stopped restart policy")
 }
 
-func validateContainerPorts(t *testing.T, tofuOptions *tofu.Options) {
-	containerName := "controlplane"
+func validateContainerPorts(t *testing.T, tofuOptions *tofu.Options, containerName string) {
 	portCmd := sh.Command{
 		Command: "docker",
 		Args:    []string{"port", containerName},
@@ -167,8 +168,7 @@ func testPortAccessibility(t *testing.T, host string, port int, description stri
 	t.Logf("Warning: %s at %s may not be fully accessible yet", description, address)
 }
 
-func validateContainerHealth(t *testing.T) {
-	containerName := "controlplane"
+func validateContainerHealth(t *testing.T, containerName string) {
 	maxRetries := 30
 	retryInterval := 2 * time.Second
 
@@ -222,8 +222,7 @@ func validateContainerHealth(t *testing.T) {
 		"Container should at least be in running state")
 }
 
-func validateK3sService(t *testing.T) {
-	containerName := "controlplane"
+func validateK3sService(t *testing.T, containerName string) {
 	maxRetries := 30
 	retryInterval := 3 * time.Second
 
@@ -287,7 +286,8 @@ func validateK3sService(t *testing.T) {
 }
 
 func TestK3sInfrastructureWithCustomVariables(t *testing.T) {
-	utils.CleanupContainer()
+	containerName := fmt.Sprintf("controlplane-%s", uuid.New().String()[:8])
+	utils.CleanupContainer(containerName)
 
 	t.Parallel()
 
@@ -304,7 +304,6 @@ func TestK3sInfrastructureWithCustomVariables(t *testing.T) {
 	defer tofu.Destroy(t, tofuOptions)
 	tofu.InitAndApply(t, tofuOptions)
 
-	containerName := "controlplane"
 	memoryCmd := sh.Command{
 		Command: "docker",
 		Args:    []string{"inspect", containerName, "--format", "{{.HostConfig.Memory}}"},

@@ -2,10 +2,10 @@ package utils
 
 import "os/exec"
 
-func CleanupContainer() {
-	stopCmd := exec.Command("docker", "stop", "controlplane")
+func CleanupContainer(containerName string) {
+	stopCmd := exec.Command("docker", "stop", containerName)
 	stopCmd.Run()
 
-	rmCmd := exec.Command("docker", "rm", "-f", "controlplane")
+	rmCmd := exec.Command("docker", "rm", "-f", containerName)
 	rmCmd.Run()
 }
