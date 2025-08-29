@@ -1,13 +1,13 @@
-# Homelab
+# 👨‍💻Infra
 
-The aim of this project is to create a local k3s cluster that can be replicated on your premises.  
-It is built with automation and scalability in mind.  
-Perfect for learning, testing, and tinkering.  
+Let's replicate on your premises a local k3s cluster!  
+Built with automation and scalability in mind.  
+Perfect for learning, testing, or going further.  
 
 ## Overview
 
-The lab consists of a k3s Docker container.
-It means you are free to deploy as many containers as you wish, as long as you have the resources to run them.
+To keep it simple, only one container is deployed by default.
+You are free to deploy as many containers as you wish, as long as you have the resources to run them.
 
 **Tech Stack:**
 
