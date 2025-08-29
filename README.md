@@ -6,7 +6,7 @@ Perfect for learning, testing, or going further.
 
 ## Overview
 
-To keep it simple, only one container is deployed by default.
+To keep it simple, only one container is deployed by default.  
 You are free to deploy as many containers as you wish, as long as you have the resources to run them.
 
 **Tech Stack:**
