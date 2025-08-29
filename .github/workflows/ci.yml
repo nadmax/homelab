@@ -2,12 +2,98 @@ name: CI
 
 on:
   pull_request:
+  workflow_dispatch:
 
 jobs:
-  ansible:
-    name: Ansible
-    uses: ./.github/workflows/ansible.yml
+  fmt:
+    defaults:
+      run:
+        working-directory: core/tofu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  opentofu:
-    name: OpenTofu
-    uses: ./.github/workflows/opentofu.yml
+      - name: Install OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Check configuration format
+        run: tofu fmt -check -write=false -diff
+        continue-on-error: false
+
+  test:
+    needs: fmt
+    defaults:
+      run:
+        working-directory: core/tofu
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24.5
+          cache-dependency-path: core/tofu/test/go.sum
+
+      - name: Install OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.10.5
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.HOME }}/.cache/go-build
+            ${{ env.HOME }}/go/pkg/mod
+          key: ${{ runner.os }}-go${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-v2-
+
+      - name: Install dependencies
+        working-directory: core/tofu/test
+        run: go mod download
+
+      - name: Run Validation test
+        working-directory: core/tofu/test
+        run: go test -v -timeout 2m -tags validation > validation-results.json
+
+      - name: Run Endpoint test
+        working-directory: core/tofu/test
+        run: go test -v -timeout 2m -tags endpoint > endpoint-results.json
+
+      - name: Run Full Lab Tests
+        working-directory: core/tofu/test
+        run: go test -v -timeout 2m -tags full > full-results.json
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            core/tofu/test/validation-results.json
+            core/tofu/test/endpoint-results.json
+            core/tofu/test/full-results.json
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Security Scan
+        uses: aquasecurity/trivy-action@0.33.0
+        with:
+          scan-type: "fs"
+          ignore-unfixed: true
+          format: "sarif"
+          output: "security-results.sarif"
+          severity: "CRITICAL,HIGH"
+
+      - name: Upload Scan Results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: security-results.sarif

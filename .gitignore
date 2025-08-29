@@ -1,8 +1,3 @@
 *.lock*
 *.terraform
 *.tfstate*
-*vault*
-*secrets
-*.passwd
-*.json
-.os-type
