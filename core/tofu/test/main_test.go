@@ -100,12 +100,18 @@ func validateDockerContainer(t *testing.T, containerName string) {
 
 	imageCmd := sh.Command{
 		Command: "docker",
-		Args:    []string{"inspect", containerName, "--format", "{{.Config.Image}}"},
+		Args:    []string{"inspect", containerName, "--format", "{{.Image}}"},
 	}
-	image := sh.RunCommandAndGetOutput(t, imageCmd)
+	imageID := sh.RunCommandAndGetOutput(t, imageCmd)
+	expectedImage := "rancher/k3s:v1.32.8-k3s1-amd64"
+	digestCmd := sh.Command{
+		Command: "docker",
+		Args:    []string{"inspect", "--format", "{{.Id}}", expectedImage},
+	}
+	expectedDigest := sh.RunCommandAndGetOutput(t, digestCmd)
 
-	assert.Contains(t, image, "rancher/k3s:v1.32.8-k3s1-amd64",
-		"Container should be using rancher/k3s image")
+	assert.Equal(t, strings.TrimSpace(expectedDigest), strings.TrimSpace(imageID),
+		"Container should be based on expected image")
 
 	privilegedCmd := sh.Command{
 		Command: "docker",
