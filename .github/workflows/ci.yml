@@ -82,7 +82,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Security Scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: "fs"
           ignore-unfixed: true
