@@ -22,14 +22,14 @@ variable "docker_external_port" {
   default     = 8080
 }
 
-variable "k8s_internal_port" {
-  description = "Port inside the container where the Kubernetes API server listens"
+variable "k3s_internal_port" {
+  description = "Port inside the container where the K3s API server listens"
   type        = number
   default     = 6443
 }
 
-variable "k8s_external_port" {
-  description = "Port on the host machine mapped to the container's Kubernetes API server port"
+variable "k3s_external_port" {
+  description = "Port on the host machine mapped to the container's K3s API server port"
   type        = number
   default     = 16443
 }

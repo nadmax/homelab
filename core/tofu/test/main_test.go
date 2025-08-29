@@ -17,7 +17,7 @@ import (
 func TestK3sInfrastructure(t *testing.T) {
 	containerName := fmt.Sprintf("controlplane-%s", uuid.New().String()[:8])
 	dockerPort := utils.GetAvailablePort(t)
-	k8sPort := utils.GetAvailablePort(t)
+	k3sPort := utils.GetAvailablePort(t)
 	utils.CleanupContainer(containerName)
 
 	t.Parallel()
@@ -28,8 +28,8 @@ func TestK3sInfrastructure(t *testing.T) {
 			"memory":               4096,
 			"docker_internal_port": 80,
 			"docker_external_port": dockerPort,
-			"k8s_internal_port":    6443,
-			"k8s_external_port":    k8sPort,
+			"k3s_internal_port":    6443,
+			"k3s_external_port":    k3sPort,
 			"restart_condition":    "unless-stopped",
 			"container_name":       containerName,
 		},
@@ -126,9 +126,11 @@ func validateContainerPorts(t *testing.T, tofuOptions *tofu.Options, containerNa
 		Args:    []string{"port", containerName},
 	}
 	portMappings := sh.RunCommandAndGetOutput(t, portCmd)
+	dockerPort := tofuOptions.Vars["docker_external_port"].(int)
+	k3sPort := tofuOptions.Vars["k3s_external_port"].(int)
 	expectedMappings := []string{
-		"80/tcp -> 0.0.0.0:8080",
-		"6443/tcp -> 0.0.0.0:16443",
+		fmt.Sprintf("80/tcp -> 0.0.0.0:%d", dockerPort),
+		fmt.Sprintf("6443/tcp -> 0.0.0.0:%d", k3sPort),
 	}
 
 	for _, expectedMapping := range expectedMappings {
@@ -136,11 +138,8 @@ func validateContainerPorts(t *testing.T, tofuOptions *tofu.Options, containerNa
 			"Container should have port mapping: %s", expectedMapping)
 	}
 
-	dockerPort := tofuOptions.Vars["docker_external_port"].(int)
-	k8sPort := tofuOptions.Vars["k8s_external_port"].(int)
-
 	testPortAccessibility(t, "localhost", dockerPort, "Docker port")
-	testPortAccessibility(t, "localhost", k8sPort, "Kubernetes API port")
+	testPortAccessibility(t, "localhost", k3sPort, "K3s API port")
 }
 
 func testPortAccessibility(t *testing.T, host string, port int, description string) {
@@ -290,7 +289,7 @@ func validateK3sService(t *testing.T, containerName string) {
 func TestK3sInfrastructureWithCustomVariables(t *testing.T) {
 	containerName := fmt.Sprintf("controlplane-%s", uuid.New().String()[:8])
 	dockerPort := utils.GetAvailablePort(t)
-	k8sPort := utils.GetAvailablePort(t)
+	k3sPort := utils.GetAvailablePort(t)
 	utils.CleanupContainer(containerName)
 
 	t.Parallel()
@@ -300,7 +299,7 @@ func TestK3sInfrastructureWithCustomVariables(t *testing.T) {
 		Vars: map[string]interface{}{
 			"memory":               2048,
 			"docker_external_port": dockerPort,
-			"k8s_external_port":    k8sPort,
+			"k3s_external_port":    k3sPort,
 			"container_name":       containerName,
 		},
 		NoColor: true,
@@ -325,10 +324,10 @@ func TestK3sInfrastructureWithCustomVariables(t *testing.T) {
 		Args:    []string{"port", containerName},
 	}
 	portMappings := sh.RunCommandAndGetOutput(t, portCmd)
-	assert.Contains(t, portMappings, "80/tcp -> 0.0.0.0:8081",
-		"Container should have custom docker port mapping")
-	assert.Contains(t, portMappings, "6443/tcp -> 0.0.0.0:16444",
-		"Container should have custom K8s port mapping")
+	assert.Contains(t, portMappings, fmt.Sprintf("80/tcp -> 0.0.0.0:%d", dockerPort),
+		"Container should have custom Docker port mapping")
+	assert.Contains(t, portMappings, fmt.Sprintf("0:0:0:0:%d", k3sPort),
+		"Container should have custom K3s port mapping")
 }
 
 func parseMemoryLimit(t *testing.T, memoryStr string) int64 {

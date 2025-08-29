@@ -16,8 +16,8 @@ resource "docker_container" "container" {
   }
 
   ports {
-    internal = var.k8s_internal_port
-    external = var.k8s_external_port
+    internal = var.k3s_internal_port
+    external = var.k3s_external_port
   }
 
   memory     = var.memory

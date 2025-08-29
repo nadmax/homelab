@@ -15,7 +15,7 @@ func TestK3sAPIEndpoint(t *testing.T) {
 	tofuOptions := tofu.WithDefaultRetryableErrors(t, &tofu.Options{
 		TerraformDir: "../",
 		Vars: map[string]interface{}{
-			"k8s_external_port": 16443,
+			"k3s_external_port": 16443,
 		},
 		NoColor: true,
 	})
