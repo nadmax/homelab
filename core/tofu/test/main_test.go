@@ -20,8 +20,6 @@ func TestK3sInfrastructure(t *testing.T) {
 	k3sPort := utils.GetAvailablePort(t)
 	utils.CleanupContainer(containerName)
 
-	t.Parallel()
-
 	tofuOptions := tofu.WithDefaultRetryableErrors(t, &tofu.Options{
 		TerraformDir: "../",
 		Vars: map[string]interface{}{
