@@ -1,12 +1,12 @@
 # 👨‍💻Infra
 
-Let's replicate on your premises a local k3s cluster!
-Built with automation and scalability in mind.
-Perfect for learning, testing, and tinkering.
+Let's replicate on your premises a local k3s cluster!  
+Built with automation and scalability in mind.  
+Perfect for learning, testing, or going further.  
 
 ## Overview
 
-By default, only one container is deployed to experiment or go further k3s.
+To keep it simple, only one container is deployed by default.
 You are free to deploy as many containers as you wish, as long as you have the resources to run them.
 
 **Tech Stack:**
