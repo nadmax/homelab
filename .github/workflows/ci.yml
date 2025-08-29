@@ -61,7 +61,7 @@ jobs:
 
       - name: Run Endpoint test
         working-directory: core/tofu/test
-        run: go test -v timeout 2m -tags endpoint
+        run: go test -v -timeout 2m -tags endpoint
 
       - name: Run Full Lab Tests
         working-directory: core/tofu/test
