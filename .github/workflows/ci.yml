@@ -22,6 +22,7 @@ jobs:
         continue-on-error: false
 
   test:
+    needs: fmt
     defaults:
       run:
         working-directory: core/tofu
@@ -80,17 +81,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Tofu Security Scan
-        uses: aquasecurity/tfsec-action@v1.0.0
+      - name: Run Trivy FS Scan (Vulnerabilities & Misconfigurations)
+        uses: aquasecurity/trivy-action@0.33.0
         with:
-          soft_fail: true
-
-      - name: Run Go Security Scan
-        uses: securego/gosec@master
-        with:
-          args: "-fmt sarif -out results.sarif ./core/tofu/test/"
+          scan-type: "fs"
+          ignore-unfixed: true
+          format: "sarif"
+          output: "securityy-results.sarif"
+          severity: "CRITICAL"
 
       - name: Upload Scan Results
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: results.sarif
+          sarif_file: "security-results.sarif"
