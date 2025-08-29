@@ -326,7 +326,7 @@ func TestK3sInfrastructureWithCustomVariables(t *testing.T) {
 	portMappings := sh.RunCommandAndGetOutput(t, portCmd)
 	assert.Contains(t, portMappings, fmt.Sprintf("80/tcp -> 0.0.0.0:%d", dockerPort),
 		"Container should have custom Docker port mapping")
-	assert.Contains(t, portMappings, fmt.Sprintf("0:0:0:0:%d", k3sPort),
+	assert.Contains(t, portMappings, fmt.Sprintf("0.0.0.0:%d", k3sPort),
 		"Container should have custom K3s port mapping")
 }
 
