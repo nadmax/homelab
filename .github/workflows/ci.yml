@@ -81,16 +81,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Trivy FS Scan (Vulnerabilities & Misconfigurations)
-        uses: aquasecurity/trivy-action@0.33.0
+      - name: Run Security Scan
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: "fs"
           ignore-unfixed: true
           format: "sarif"
-          output: "securityy-results.sarif"
-          severity: "CRITICAL"
+          output: "security-results.sarif"
+          severity: "CRITICAL,HIGH"
 
       - name: Upload Scan Results
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: "security-results.sarif"
+          sarif_file: security-results.sarif
