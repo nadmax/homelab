@@ -98,7 +98,7 @@ func validateDockerContainer(t *testing.T, containerName string) {
 	}
 	image := sh.RunCommandAndGetOutput(t, imageCmd)
 
-	assert.Contains(t, image, "rancher/k3s",
+	assert.Contains(t, image, "rancher/k3s:v1.32.8-k3s1-amd64",
 		"Container should be using rancher/k3s image")
 
 	privilegedCmd := sh.Command{
