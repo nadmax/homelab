@@ -1,4 +1,4 @@
-//go:build !endpoint
+//go:build endpoint
 
 package test
 

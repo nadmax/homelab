@@ -1,4 +1,4 @@
-//go:build !full
+//go:build full
 
 package test
 
