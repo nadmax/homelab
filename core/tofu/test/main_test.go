@@ -16,6 +16,8 @@ import (
 
 func TestK3sInfrastructure(t *testing.T) {
 	containerName := fmt.Sprintf("controlplane-%s", uuid.New().String()[:8])
+	dockerPort := utils.GetAvailablePort(t)
+	k8sPort := utils.GetAvailablePort(t)
 	utils.CleanupContainer(containerName)
 
 	t.Parallel()
@@ -25,9 +27,9 @@ func TestK3sInfrastructure(t *testing.T) {
 		Vars: map[string]interface{}{
 			"memory":               4096,
 			"docker_internal_port": 80,
-			"docker_external_port": 8080,
+			"docker_external_port": dockerPort,
 			"k8s_internal_port":    6443,
-			"k8s_external_port":    16443,
+			"k8s_external_port":    k8sPort,
 			"restart_condition":    "unless-stopped",
 			"container_name":       containerName,
 		},
@@ -287,6 +289,8 @@ func validateK3sService(t *testing.T, containerName string) {
 
 func TestK3sInfrastructureWithCustomVariables(t *testing.T) {
 	containerName := fmt.Sprintf("controlplane-%s", uuid.New().String()[:8])
+	dockerPort := utils.GetAvailablePort(t)
+	k8sPort := utils.GetAvailablePort(t)
 	utils.CleanupContainer(containerName)
 
 	t.Parallel()
@@ -295,8 +299,9 @@ func TestK3sInfrastructureWithCustomVariables(t *testing.T) {
 		TerraformDir: "../",
 		Vars: map[string]interface{}{
 			"memory":               2048,
-			"docker_external_port": 8081,
-			"k8s_external_port":    16444,
+			"docker_external_port": dockerPort,
+			"k8s_external_port":    k8sPort,
+			"container_name":       containerName,
 		},
 		NoColor: true,
 	})
