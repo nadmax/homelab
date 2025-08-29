@@ -39,7 +39,7 @@ func TestK3sAPIEndpoint(t *testing.T) {
 
 		resp, err := client.Get(apiURL)
 		if err == nil && resp.StatusCode == http.StatusUnauthorized {
-			t.Logf("Kubernetes API is accessible at %s (got expected 401)", apiURL)
+			t.Logf("K3s API is accessible at %s (got expected 401)", apiURL)
 			resp.Body.Close()
 
 			return
