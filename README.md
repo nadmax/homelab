@@ -1,3 +1,5 @@
+![GitLab CI](https://gitlab.com/nadmax/infra/badges/master/pipeline.svg)  ![GitHub CI](https://github.com/nadmax/infra/actions/workflows/ci.yml/badge.svg)
+
 # 👨‍💻Infra
 
 Let's replicate on your premises a local k3s cluster!  

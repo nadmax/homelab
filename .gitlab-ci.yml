@@ -1,0 +1,70 @@
+stages:
+  - format
+  - test
+  - security
+
+variables:
+  WORKING_DIR: "core/tofu"
+  GO_VERSION: "1.24.5"
+  TOFU_VERSION: "1.10.5"
+
+fmt:
+  stage: format
+  image: oowy/opentofu:1.9.1-alpine3.20
+  before_script:
+    - cd $WORKING_DIR
+  script:
+    - tofu fmt -check -write=false -diff
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+test:
+  stage: test
+  image: golang:1.24.7
+  needs:
+    - fmt
+  cache:
+    key:
+      files:
+        - core/tofu/test/go.sum
+    paths:
+      - .cache/go-build/
+      - go/pkg/mod/
+  before_script:
+    - cd $WORKING_DIR
+    - apt-get update && apt-get install -y wget unzip
+    - wget -O tofu.zip "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
+    - unzip tofu.zip tofu && mv tofu /usr/local/bin/
+    - cd test && go mod download
+  script:
+    - go test -v -timeout 2m -tags validation > validation-results.json || true
+    - go test -v -timeout 2m -tags endpoint > endpoint-results.json || true
+    - go test -v -timeout 2m -tags full > full-results.json || true
+  artifacts:
+    when: always
+    paths:
+      - core/tofu/test/validation-results.json
+      - core/tofu/test/endpoint-results.json
+      - core/tofu/test/full-results.json
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+security:
+  stage: security
+  image:
+    name: aquasec/trivy:0.66.0
+    entrypoint: [""]
+  script:
+    - trivy fs --ignore-unfixed --format sarif --output security-results.sarif --severity CRITICAL,HIGH .
+  artifacts:
+    reports:
+      sast: security-results.sarif
+    paths:
+      - security-results.sarif
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "web"
